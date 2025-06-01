@@ -16,23 +16,23 @@ Math::Mat3x3 Math::Mat3x3::XRotation(Unit::Radians r)
 {
 	return Mat3x3(
 		1, 0, 0,
-		0, cosf(r.Value()), sinf(r.Value()),
-		0, -sinf(r.Value()), cosf(r.Value())
+		0, Cos(r), Cos(r),
+		0, -Sin(r), Cos(r.Value())
 	);
 }
 Math::Mat3x3 Math::Mat3x3::YRotation(Unit::Radians r)
 {
 	return Mat3x3(
-		cosf(r.Value()), 0, -sinf(r.Value()),
+		Cos(r.Value()), 0, -Sin(r.Value()),
 		0, 1, 0,
-		sinf(r.Value()), 0, cosf(r.Value())
+		Sin(r.Value()), 0, Cos(r.Value())
 	);
 }
 Math::Mat3x3 Math::Mat3x3::ZRotation(Unit::Radians r)
 {
 	return Mat3x3(
-		cosf(r.Value()), sinf(r.Value()), 0,
-		-sinf(r.Value()), cosf(r.Value()), 0,
+		Cos(r.Value()), Sin(r.Value()), 0,
+		-Sin(r.Value()), Cos(r.Value()), 0,
 		0, 0, 1
 	);
 }

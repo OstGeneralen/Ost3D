@@ -3,6 +3,7 @@
 #include "Vector4.h"
 #include "Vector3.h"
 #include "Mat4x4.h"
+#include "../Utility/Utilities.h"
 
 // ------------------------------------------------------------
 // Ctor
@@ -55,7 +56,7 @@ Math::Vector4f::Vector4f(Vector4f&& v) noexcept
 
 Math::Vector4f& Math::Vector4f::operator=(const Vector4f& v)
 {
-	memcpy_s(this, sizeof(Vector4f), &v, sizeof(Vector4f));
+	Util::MemCopy(this, &v, sizeof(Vector4f));
 	return *this;
 }
 

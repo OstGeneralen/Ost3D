@@ -137,7 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Math\FltMath.h" />
+    <ClInclude Include="Math\CommonMath.h" />
     <ClInclude Include="Math\Mat3x3.h" />
     <ClInclude Include="Math\Mat4x4.h" />
     <ClInclude Include="Math\RotationUnits.h" />
@@ -146,7 +146,7 @@
     <ClInclude Include="Utility\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Math\FltMath.cpp" />
+    <ClCompile Include="Math\CommonMath.cpp" />
     <ClCompile Include="Math\Mat3x3.cpp" />
     <ClCompile Include="Math\Mat4x4.cpp" />
     <ClCompile Include="Math\RotationUnits.cpp" />
