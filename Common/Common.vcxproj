@@ -143,6 +143,7 @@
     <ClInclude Include="Math\RotationUnits.h" />
     <ClInclude Include="Math\Vector3.h" />
     <ClInclude Include="Math\Vector4.h" />
+    <ClInclude Include="Utility\StringUtils.h" />
     <ClInclude Include="Utility\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +153,7 @@
     <ClCompile Include="Math\RotationUnits.cpp" />
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
+    <ClCompile Include="Utility\StringUtils.cpp" />
     <ClCompile Include="Utility\Utilities.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
