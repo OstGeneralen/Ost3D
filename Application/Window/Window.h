@@ -12,8 +12,12 @@ public:
 	void Close();
 	void ProcessEvents();
 
+	HWND GetHWND() const;
+	unsigned int GetWidth() const;
+	unsigned int GetHeight() const;
 
 private:
 	HWND _windowHandle;
+	unsigned int _width, _height;
 	bool _open;
 };

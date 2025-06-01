@@ -50,6 +50,9 @@ Window::Window(HINSTANCE instanceHandle, int cmdShw, int w, int h, const wchar_t
 	ShowWindow(_windowHandle, cmdShw);
 	WindowHandleClassMap.insert({ _windowHandle, this });
 	_open = true;
+
+	_width = w;
+	_height = h;
 }
 
 bool Window::GetIsOpen() const { return _open; }
@@ -66,4 +69,19 @@ void Window::ProcessEvents()
 	GetMessage(&msg, _windowHandle, 0, 0);
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
+}
+
+HWND Window::GetHWND() const
+{
+	return _windowHandle;
+}
+
+unsigned int Window::GetWidth() const
+{
+	return _width;
+}
+
+unsigned int Window::GetHeight() const
+{
+	return _height;
 }
