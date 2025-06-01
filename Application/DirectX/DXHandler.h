@@ -45,8 +45,6 @@ public:
 public:
 	DXHandlerInitErrorFlag Initialize(const Window& window);
 	void Release();
-
-	void Clear();
 private:
 	ID3D12Debug* _debugLayer;
 	IDXGIFactory4* _dxFactory;

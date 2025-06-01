@@ -182,8 +182,3 @@ void DXHandler::Release()
 	_renderHeight = 0u;
 	_frameIdx = 0u;
 }
-
-void DXHandler::Clear()
-{
-	_renderTargets[_frameIdx]->
-}
