@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <Common/Rendering/Color.h>
 
 namespace Math
 {
@@ -8,6 +9,7 @@ namespace Math
 	class Mat4x4;
 	class Mat3x3;
 }
+
 
 namespace Util
 {
@@ -19,5 +21,8 @@ namespace Util
 		
 		static std::string ToString(const Math::Mat3x3& m33);
 		static std::string ToString(const Math::Mat4x4& m44);
+
+		static std::string ToString(const RGBAColor_f32& c);
+		static std::string ToString(const RGBAColor_u8& c);
 	};
 }

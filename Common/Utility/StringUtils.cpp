@@ -4,6 +4,7 @@
 #include "../Math/Mat3x3.h"
 #include "../Math/Mat4x4.h"
 #include "../Math/CommonMath.h"
+#include <iomanip>
 
 #include <sstream>
 
@@ -11,23 +12,24 @@
 std::string Util::StringConvert::ToString(const Math::Vector3f& v3)
 {
 	std::stringstream sstream;
-	float x = Math::FltEquals(v3.X, 0.0f) ? 0 : v3.X;
-	float y = Math::FltEquals(v3.Y, 0.0f) ? 0 : v3.Y;
-	float z = Math::FltEquals(v3.Z, 0.0f) ? 0 : v3.Z;
 
-	sstream << "(" << x << ", " << y << ", " << z << ")";
+
+	sstream << "(" << 
+		std::fixed << std::setprecision(2) << v3.X << ", " <<
+		std::fixed << std::setprecision(2) << v3.Y << ", " <<
+		std::fixed << std::setprecision(2) << v3.Z << ")";
 	return sstream.str();
 }
 
 std::string Util::StringConvert::ToString(const Math::Vector4f& v4)
 {
 	std::stringstream sstream;
-	float x = Math::FltEquals(v4.X, 0.0f) ? 0 : v4.X;
-	float y = Math::FltEquals(v4.Y, 0.0f) ? 0 : v4.Y;
-	float z = Math::FltEquals(v4.Z, 0.0f) ? 0 : v4.Z;
-	float w = Math::FltEquals(v4.W, 0.0f) ? 0 : v4.W;
 
-	sstream << "(" << x << ", " << y << ", " << z << ", " << w << ")";
+	sstream << "(" << 
+		std::fixed << std::setprecision(2) << v4.X << ", " <<
+		std::fixed << std::setprecision(2) << v4.Y << ", " <<
+		std::fixed << std::setprecision(2) << v4.Z << ", " <<
+		std::fixed << std::setprecision(2) << v4.W << ")";
 	return sstream.str();
 }
 
@@ -39,9 +41,20 @@ std::string Util::StringConvert::ToString(const Math::Mat3x3& m33)
 	auto r2 = m33.Row2();
 	auto r3 = m33.Row3();
 
-	sstream << r1.X << "\t\t" << r1.Y << "\t\t" << r1.Z << "\n";
-	sstream << r2.X << "\t\t" << r2.Y << "\t\t" << r2.Z << "\n";
-	sstream << r3.X << "\t\t" << r3.Y << "\t\t" << r3.Z;
+	sstream <<  std::fixed << std::setprecision(2) << 
+		r1.X << "    " << 
+		r1.Y << "    " <<
+		r1.Z << "\n\n";
+	
+	sstream << std::fixed << std::setprecision(2) << 
+		r2.X << "    " << 
+		r2.Y << "    " << 
+		r2.Z << "\n\n";
+
+	sstream << std::fixed << std::setprecision(2) << 
+		r3.X << "    " << 
+		r3.Y << "    " <<
+		r3.Z;
 
 	return sstream.str();
 }
@@ -55,11 +68,57 @@ std::string Util::StringConvert::ToString(const Math::Mat4x4& m44)
 	auto r3 = m44.Row3();
 	auto r4 = m44.Row4();
 
-	sstream << r1.X << "\t\t" << r1.Y << "\t\t" << r1.Z << "\t\t" << r1.W << "\n";
-	sstream << r2.X << "\t\t" << r2.Y << "\t\t" << r2.Z << "\t\t" << r2.W << "\n";
-	sstream << r3.X << "\t\t" << r3.Y << "\t\t" << r3.Z << "\t\t" << r3.W << "\n";
-	sstream << r4.X << "\t\t" << r4.Y << "\t\t" << r4.Z << "\t\t" << r4.W << "\n";
+	sstream << std::fixed << std::setprecision(2) << 
+		r1.X << "    " <<
+		r1.Y << "    " <<
+		r1.Z << "    " <<
+		r1.W << "\n\n";
+	
+	sstream << std::fixed << std::setprecision(2) << 
+		r2.X << "    " <<
+		r2.Y << "    " <<
+		r2.Z << "    " <<
+		r2.W << "\n\n";
 
+	sstream << std::fixed << std::setprecision(2) << 
+		r3.X << "    " <<
+		r3.Y << "    " <<
+		r3.Z << "    " <<
+		r3.W << "\n\n";
+		//"- - -:- - - : - - -: - - " << "\n";
+	
+	sstream << std::fixed << std::setprecision(2) << 
+		r4.X << "    " <<
+		r4.Y << "    " <<
+		r4.Z << "    " <<
+		r4.W << "\n";
+		
+
+	return sstream.str();
+}
+
+std::string Util::StringConvert::ToString(const RGBAColor_f32& c)
+{
+	std::stringstream sstream;
+
+	sstream <<
+		"[R: "	<< std::fixed << std::setprecision(2) << c.R <<
+		", G: " << std::fixed << std::setprecision(2) << c.G <<
+		", B: " << std::fixed << std::setprecision(2) << c.B <<
+		" A: "	<< std::fixed << std::setprecision(2) << c.A << 
+		']';
+	return sstream.str();
+}
+
+std::string Util::StringConvert::ToString(const RGBAColor_u8& c)
+{
+	std::stringstream sstream;
+
+	sstream << 
+		"[R: " << static_cast<unsigned>(c.R) << 
+		", G: " << static_cast<unsigned>(c.G) << 
+		", B: " << static_cast<unsigned>(c.B) << 
+		" A: " << static_cast<unsigned>(c.A) << ']';
 	return sstream.str();
 }
 
