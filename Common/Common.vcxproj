@@ -145,6 +145,7 @@
     <ClInclude Include="Math\Vector3.h" />
     <ClInclude Include="Math\Vector4.h" />
     <ClInclude Include="Rendering\Color.h" />
+    <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="Utility\EnumFlag.h" />
     <ClInclude Include="Utility\StringUtils.h" />
     <ClInclude Include="Utility\Utilities.h" />
