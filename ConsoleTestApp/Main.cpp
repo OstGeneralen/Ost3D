@@ -6,22 +6,15 @@
 #include <Common/Math/Vector3.h>
 #include <Common/Math/RotationUnits.h>
 #include <Common/Utility/StringUtils.h>
+#include <Common/Rendering/Color.h>
 #include <iostream>
 
 int main(int argc, char* argv[])
 {
-
-	Math::Vector3f v3{ 10,0,2 };
-	Math::Vector4f v4{ 1,4,10,1 };
-
-	Math::Mat3x3 m33 = Math::Mat3x3::XRotation(90.0_deg);
-	Math::Mat4x4 m44 = Math::Mat4x4(m33, Math::Vector3f(1, 0, 1));
-
-	std::cout << "Vector3 " << Util::StringConvert::ToString(v3) << std::endl;
-	std::cout << "Vector4 " << Util::StringConvert::ToString(v4) << std::endl;
-	std::cout << "Mat3\n" << Util::StringConvert::ToString(m33) << std::endl;
-	std::cout << "Mat4\n" << Util::StringConvert::ToString(m44) << std::endl;
-
+	std::cout << "Vec3\n" << Util::StringConvert::ToString(Vector3f(1, 0, 2)) << std::endl;
+	std::cout << "Vec4\n" << Util::StringConvert::ToString(Vector4f(1, 0, 2, 1)) << std::endl;
+	std::cout << "Mat3x3\n" << Util::StringConvert::ToString(Mat3x3()) << std::endl;
+	std::cout << "Mat4x4\n" << Util::StringConvert::ToString(Mat4x4()) << std::endl;
 
 	return 0;
 }
