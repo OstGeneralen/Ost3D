@@ -11,6 +11,24 @@ namespace Util
 	}
 
 	template<typename T>
+	constexpr RefRemovedType<T>&& Move(T&& t) noexcept
+	{
+		return static_cast<RefRemovedType<T>&&>(t);
+	}
+
+	template<typename T>
+	constexpr RefRemovedType<T>&& Forward(T& t)
+	{
+		return static_cast<RefRemovedType<T>&&>(t);
+	}
+
+	template<typename T>
+	constexpr RefRemovedType<T>&& Forward(T&& t)
+	{
+		return static_cast<RefRemovedType<T>&&>(t);
+	}
+
+	template<typename T>
 	void Swap(T& a, T& b)
 	{
 		T tmp = a;
