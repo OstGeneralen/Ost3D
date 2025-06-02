@@ -12,59 +12,59 @@ int m13 = 6; int m23 = 7; int m33 = 8;
 // Statics
 // ------------------------------------------------------------
 
-Math::Mat3x3 Math::Mat3x3::XRotation(Unit::Radians r)
+Mat3x3 Mat3x3::XRotation(Radians r)
 {
 	return Mat3x3(
 		1, 0, 0,
-		0, Cos(r), Cos(r),
-		0, -Sin(r), Cos(r.Value())
+		0, Math::Cos(r), Math::Cos(r),
+		0, -Math::Sin(r), Math::Cos(r.Value())
 	);
 }
-Math::Mat3x3 Math::Mat3x3::YRotation(Unit::Radians r)
+Mat3x3 Mat3x3::YRotation(Radians r)
 {
 	return Mat3x3(
-		Cos(r.Value()), 0, -Sin(r.Value()),
+		Math::Cos(r.Value()), 0, -Math::Sin(r.Value()),
 		0, 1, 0,
-		Sin(r.Value()), 0, Cos(r.Value())
+		Math::Sin(r.Value()), 0, Math::Cos(r.Value())
 	);
 }
-Math::Mat3x3 Math::Mat3x3::ZRotation(Unit::Radians r)
+Mat3x3 Mat3x3::ZRotation(Radians r)
 {
 	return Mat3x3(
-		Cos(r.Value()), Sin(r.Value()), 0,
-		-Sin(r.Value()), Cos(r.Value()), 0,
+		Math::Cos(r.Value()), Math::Sin(r.Value()), 0,
+		-Math::Sin(r.Value()), Math::Cos(r.Value()), 0,
 		0, 0, 1
 	);
 }
 
-const Math::Mat3x3 Math::Mat3x3::Identity{ Math::Mat3x3::IdentData };
+const Mat3x3 Mat3x3::Identity{ Mat3x3::IdentData };
 
 // ------------------------------------------------------------
 // Ctor
 // ------------------------------------------------------------
 
-Math::Mat3x3::Mat3x3()
+Mat3x3::Mat3x3()
 	: Data{ 1,0,0,
 			0,1,0,
 			0,0,1 }
 {
 }
 
-Math::Mat3x3::Mat3x3(float row1[Cols], float row2[Cols], float row3[Cols])
+Mat3x3::Mat3x3(float row1[Cols], float row2[Cols], float row3[Cols])
 	: Data{ row1[0], row1[1], row1[2],
 			row2[0], row2[1], row2[2],
 			row3[0], row3[1], row3[2] }
 {
 }
 
-Math::Mat3x3::Mat3x3(float m11, float m21, float m31, float m12, float m22, float m32, float m13, float m23, float m33)
+Mat3x3::Mat3x3(float m11, float m21, float m31, float m12, float m22, float m32, float m13, float m23, float m33)
 	: Data{ m11, m21, m31,
 			m12, m22, m32,
 			m13, m23, m33 }
 {
 }
 
-Math::Mat3x3::Mat3x3(float const data[Elems])
+Mat3x3::Mat3x3(float const data[Elems])
 	: Mat3x3()
 {
 	Util::MemCopy(Data, data, DataSize);
@@ -74,23 +74,23 @@ Math::Mat3x3::Mat3x3(float const data[Elems])
 // Util
 // ------------------------------------------------------------
 
-Math::Vector3f Math::Mat3x3::Row1() const { return Vector3f(Data[m11], Data[m21], Data[m31]); }
-Math::Vector3f Math::Mat3x3::Row2() const { return Vector3f(Data[m12], Data[m22], Data[m32]); }
-Math::Vector3f Math::Mat3x3::Row3() const { return Vector3f(Data[m13], Data[m23], Data[m33]); }
+Vector3f Mat3x3::Row1() const { return Vector3f(Data[m11], Data[m21], Data[m31]); }
+Vector3f Mat3x3::Row2() const { return Vector3f(Data[m12], Data[m22], Data[m32]); }
+Vector3f Mat3x3::Row3() const { return Vector3f(Data[m13], Data[m23], Data[m33]); }
 
-void Math::Mat3x3::Row1_CopyTo(float* dst) const { Util::MemCopy(dst, &(Data[0 * Cols]), RowStride); }
-void Math::Mat3x3::Row2_CopyTo(float* dst) const { Util::MemCopy(dst, &(Data[1 * Cols]), RowStride); }
-void Math::Mat3x3::Row3_CopyTo(float* dst) const { Util::MemCopy(dst, &(Data[2 * Cols]), RowStride); }
+void Mat3x3::Row1_CopyTo(float* dst) const { Util::MemCopy(dst, &(Data[0 * Cols]), RowStride); }
+void Mat3x3::Row2_CopyTo(float* dst) const { Util::MemCopy(dst, &(Data[1 * Cols]), RowStride); }
+void Mat3x3::Row3_CopyTo(float* dst) const { Util::MemCopy(dst, &(Data[2 * Cols]), RowStride); }
 
-Math::Vector3f Math::Mat3x3::Col1() const { return Vector3f(Data[m11], Data[m12], Data[m13]); }
-Math::Vector3f Math::Mat3x3::Col2() const { return Vector3f(Data[m21], Data[m22], Data[m23]); }
-Math::Vector3f Math::Mat3x3::Col3() const { return Vector3f(Data[m31], Data[m32], Data[m33]); }
+Vector3f Mat3x3::Col1() const { return Vector3f(Data[m11], Data[m12], Data[m13]); }
+Vector3f Mat3x3::Col2() const { return Vector3f(Data[m21], Data[m22], Data[m23]); }
+Vector3f Mat3x3::Col3() const { return Vector3f(Data[m31], Data[m32], Data[m33]); }
 
 // ------------------------------------------------------------
 // Ops
 // ------------------------------------------------------------
 
-Math::Mat3x3& Math::Mat3x3::operator*=(const Mat3x3& m)
+Mat3x3& Mat3x3::operator*=(const Mat3x3& m)
 {
 	Vector3f row1{ Row1() };
 	Vector3f row2{ Row2() };
@@ -115,7 +115,7 @@ Math::Mat3x3& Math::Mat3x3::operator*=(const Mat3x3& m)
 	return *this;
 }
 
-Math::Mat3x3 Math::Mat3x3::operator*(const Mat3x3& m) const
+Mat3x3 Mat3x3::operator*(const Mat3x3& m) const
 {
 	return Mat3x3(
 		Row1().Dot(m.Col1()), Row1().Dot(m.Col2()), Row1().Dot(m.Col3()),
@@ -124,12 +124,12 @@ Math::Mat3x3 Math::Mat3x3::operator*(const Mat3x3& m) const
 	);
 }
 
-Math::Mat3x3 Math::Mat3x3::Inverse() const
+Mat3x3 Mat3x3::Inverse() const
 {
 	return CofactorMatrix().Transpose();
 }
 
-Math::Mat3x3 Math::Mat3x3::Transpose() const
+Mat3x3 Mat3x3::Transpose() const
 {
 	return Mat3x3(
 		Data[m11], Data[m12], Data[m13],
@@ -141,7 +141,7 @@ Math::Mat3x3 Math::Mat3x3::Transpose() const
 // Internal ops/util
 // ------------------------------------------------------------
 
-Math::Mat3x3 Math::Mat3x3::CofactorMatrix() const
+Mat3x3 Mat3x3::CofactorMatrix() const
 {
 	return Mat3x3{
 		MinorDeterminant11(), -MinorDeterminant21(), MinorDeterminant31(),
@@ -150,7 +150,7 @@ Math::Mat3x3 Math::Mat3x3::CofactorMatrix() const
 	};
 }
 
-float Math::Mat3x3::Determinant() const
+float Mat3x3::Determinant() const
 {
 	float a = Data[m11] * Data[m22] * Data[m33];
 	float b = Data[m21] * Data[m32] * Data[m13];
@@ -163,12 +163,12 @@ float Math::Mat3x3::Determinant() const
 	return a + b + c - x - y - z;
 }
 
-float Math::Mat3x3::MinorDeterminant11() const { return (Data[m22] * Data[m33]) - (Data[m32] * Data[m23]); }
-float Math::Mat3x3::MinorDeterminant22() const { return (Data[m11] * Data[m33]) - (Data[m31] * Data[m13]); }
-float Math::Mat3x3::MinorDeterminant33() const { return (Data[m11] * Data[m22]) - (Data[m21] * Data[m12]); }
-float Math::Mat3x3::MinorDeterminant21() const { return (Data[m12] * Data[m33]) - (Data[m32] * Data[m13]); }
-float Math::Mat3x3::MinorDeterminant23() const { return (Data[m11] * Data[m32]) - (Data[m31] * Data[m12]); }
-float Math::Mat3x3::MinorDeterminant12() const { return (Data[m21] * Data[m33]) - (Data[m31] * Data[m23]); }
-float Math::Mat3x3::MinorDeterminant13() const { return (Data[m21] * Data[m32]) - (Data[m31] * Data[m22]); }
-float Math::Mat3x3::MinorDeterminant31() const { return (Data[m12] * Data[m23]) - (Data[m22] * Data[m13]); }
-float Math::Mat3x3::MinorDeterminant32() const { return (Data[m11] * Data[m23]) - (Data[m21] * Data[m13]); }
+float Mat3x3::MinorDeterminant11() const { return (Data[m22] * Data[m33]) - (Data[m32] * Data[m23]); }
+float Mat3x3::MinorDeterminant22() const { return (Data[m11] * Data[m33]) - (Data[m31] * Data[m13]); }
+float Mat3x3::MinorDeterminant33() const { return (Data[m11] * Data[m22]) - (Data[m21] * Data[m12]); }
+float Mat3x3::MinorDeterminant21() const { return (Data[m12] * Data[m33]) - (Data[m32] * Data[m13]); }
+float Mat3x3::MinorDeterminant23() const { return (Data[m11] * Data[m32]) - (Data[m31] * Data[m12]); }
+float Mat3x3::MinorDeterminant12() const { return (Data[m21] * Data[m33]) - (Data[m31] * Data[m23]); }
+float Mat3x3::MinorDeterminant13() const { return (Data[m21] * Data[m32]) - (Data[m31] * Data[m22]); }
+float Mat3x3::MinorDeterminant31() const { return (Data[m12] * Data[m23]) - (Data[m22] * Data[m13]); }
+float Mat3x3::MinorDeterminant32() const { return (Data[m11] * Data[m23]) - (Data[m21] * Data[m13]); }

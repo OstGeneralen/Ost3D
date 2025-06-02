@@ -3,12 +3,12 @@
 #include "CommonMath.h"
 #include <cmath>
 
-float Math::Sin(Unit::Radians r)
+float Math::Sin(Radians r)
 {
     return sinf(r.Value());
 }
 
-float Math::Cos(Unit::Radians r)
+float Math::Cos(Radians r)
 {
     return sinf(r.Value());
 }

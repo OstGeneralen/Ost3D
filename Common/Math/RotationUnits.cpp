@@ -12,24 +12,24 @@ constexpr float c_radToDeg = 180.0f / Math::Constants::PI;
 // DEGREES
 // ------------------------------------------------------------
 
-Unit::Degrees::Degrees() : _v{ 0.0f } {}
-Unit::Degrees::Degrees(float v) : _v{v} {}
+Degrees::Degrees() : _v{ 0.0f } {}
+Degrees::Degrees(float v) : _v{v} {}
 
-float Unit::Degrees::Value() const { return _v; }
+float Degrees::Value() const { return _v; }
 
-Unit::Degrees::operator Unit::Radians() const { return Radians(_v * c_degToRad); }
+Degrees::operator Radians() const { return Radians(_v * c_degToRad); }
 
-Unit::Degrees& Unit::Degrees::operator=(const Degrees& v)
+Degrees& Degrees::operator=(const Degrees& v)
 {
 	_v = v._v;
 	return *this;
 }
-Unit::Degrees& Unit::Degrees::operator=(float fv)
+Degrees& Degrees::operator=(float fv)
 {
 	_v = fv;
 	return *this;
 }
-Unit::Degrees& Unit::Degrees::operator=(Radians rv)
+Degrees& Degrees::operator=(Radians rv)
 {
 	(*this) = rv;
 	return *this;
@@ -39,30 +39,30 @@ Unit::Degrees& Unit::Degrees::operator=(Radians rv)
 // RADIANS
 // ------------------------------------------------------------
 
-Unit::Radians::Radians()
+Radians::Radians()
 	: _v(0.0f)
 {
 }
-Unit::Radians::Radians(float v)
+Radians::Radians(float v)
 	: _v(v)
 {
 }
 
-float Unit::Radians::Value() const { return _v; }
+float Radians::Value() const { return _v; }
 
-Unit::Radians::operator Unit::Degrees() const { return Degrees(_v * c_radToDeg); }
+Radians::operator Degrees() const { return Degrees(_v * c_radToDeg); }
 
-Unit::Radians& Unit::Radians::operator=(const Radians& rv)
+Radians& Radians::operator=(const Radians& rv)
 {
 	_v = rv._v;
 	return *this;
 }
-Unit::Radians& Unit::Radians::operator=(float fv)
+Radians& Radians::operator=(float fv)
 {
 	_v = fv;
 	return *this;
 }
-Unit::Radians& Unit::Radians::operator=(Degrees dv)
+Radians& Radians::operator=(Degrees dv)
 {
 	(*this) = dv;
 	return *this;

@@ -13,8 +13,8 @@ namespace Math
 		constexpr float PI = 3.14159f;
 	}
 
-	extern float Sin(Unit::Radians r);
-	extern float Cos(Unit::Radians r);
+	extern float Sin(Radians r);
+	extern float Cos(Radians r);
 
 	extern float SquareRoot(float v);
 

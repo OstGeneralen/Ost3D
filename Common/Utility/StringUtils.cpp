@@ -9,7 +9,7 @@
 #include <sstream>
 
 
-std::string Util::StringConvert::ToString(const Math::Vector3f& v3)
+std::string Util::StringConvert::ToString(const Vector3f& v3)
 {
 	std::stringstream sstream;
 
@@ -21,7 +21,7 @@ std::string Util::StringConvert::ToString(const Math::Vector3f& v3)
 	return sstream.str();
 }
 
-std::string Util::StringConvert::ToString(const Math::Vector4f& v4)
+std::string Util::StringConvert::ToString(const Vector4f& v4)
 {
 	std::stringstream sstream;
 
@@ -33,7 +33,7 @@ std::string Util::StringConvert::ToString(const Math::Vector4f& v4)
 	return sstream.str();
 }
 
-std::string Util::StringConvert::ToString(const Math::Mat3x3& m33)
+std::string Util::StringConvert::ToString(const Mat3x3& m33)
 {
 	std::stringstream sstream;
 
@@ -59,7 +59,7 @@ std::string Util::StringConvert::ToString(const Math::Mat3x3& m33)
 	return sstream.str();
 }
 
-std::string Util::StringConvert::ToString(const Math::Mat4x4& m44)
+std::string Util::StringConvert::ToString(const Mat4x4& m44)
 {
 	std::stringstream sstream;
 
