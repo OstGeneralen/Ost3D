@@ -2,8 +2,11 @@
 #include <Common/Math/Vector4.h>
 #include <Common/Rendering/Color.h>
 
-struct Vertex_pV4_cf32
+struct Vertex_Pos4_fCol4
 {
-	Math::Vector4f Position;
+	Vector4f Position;
 	RGBAColor_f32 Color;
 };
+
+// Define the basic vertex type
+using Vertex = Vertex_Pos4_fCol4;
