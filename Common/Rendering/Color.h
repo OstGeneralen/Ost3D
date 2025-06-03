@@ -21,6 +21,8 @@ struct RGBAColor_f32
 	RGBAColor_f32(const RGBAColor_f32&);
 	RGBAColor_f32(uint32 hex);
 
+	void CopyToFloatBuffer(float* buffer) const;
+
 	RGBAColor_u8 ToRGBA_u8() const;
 };
 
