@@ -14,8 +14,9 @@ struct ID3D12CommandQueue;
 struct IDXGISwapChain3;
 struct ID3D12DescriptorHeap;
 struct ID3D12CommandAllocator;
-struct ID3D12CommandList;
+struct ID3D12GraphicsCommandList;
 struct ID3D12Resource;
+struct ID3D12Fence;
 
 class Window;
 
@@ -44,6 +45,8 @@ public:
 	
 public:
 	DXHandlerInitErrorFlag Initialize(const Window& window);
+	void InitializeRendering();
+
 	void Release();
 private:
 	ID3D12Debug* _debugLayer;
@@ -59,12 +62,18 @@ private:
 	ID3D12Resource* _renderTargets[s_bufferCount];
 
 	ID3D12CommandAllocator* _cmdAlloc;
-	ID3D12CommandList* _cmdList;
+	ID3D12GraphicsCommandList* _cmdList;
+
+	ID3D12Fence* _commandFence;
 
 	unsigned int _renderWidth;
 	unsigned int _renderHeight;
 
 	unsigned int _frameIdx;
+
+	unsigned long long _fenceValue;
+
+	void* _fenceEvent;
 
 };
 

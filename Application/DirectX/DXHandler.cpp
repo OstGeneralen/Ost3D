@@ -53,9 +53,12 @@ DXHandler::DXHandler()
 	, _renderTargets{nullptr, nullptr}
 	, _cmdAlloc{nullptr}
 	, _cmdList{nullptr}
+	, _commandFence{nullptr}
 	, _renderWidth{0u}
 	, _renderHeight{0u}
 	, _frameIdx{0u}
+	, _fenceValue{0ull}
+	, _fenceEvent{nullptr}
 {
 }
 
@@ -163,6 +166,29 @@ DXHandlerInitErrorFlag DXHandler::Initialize(const Window& window)
 	}
 
 	return DXHandlerErrors::Success;
+}
+
+void DXHandler::InitializeRendering()
+{
+	if (FAILED(_dxDevice->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		_cmdAlloc,
+		nullptr,
+		IID_PPV_ARGS(&_cmdList)
+	)))
+	{
+		return;
+	}
+
+	_cmdList->Close();
+	
+	if (FAILED(_dxDevice->CreateFence(_fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_commandFence))))
+	{
+		return;
+	}
+
+	_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 }
 
 void DXHandler::Release()
