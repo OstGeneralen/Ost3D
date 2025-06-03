@@ -1,4 +1,5 @@
 #include "Color.h"
+#include "../Utility/Utilities.h"
 
 // ------------------------------------------------------------
 // float RGBA
@@ -38,6 +39,11 @@ RGBAColor_f32::RGBAColor_f32(uint32 hex)
 	G = v.G;
 	B = v.B;
 	A = v.A;
+}
+
+void RGBAColor_f32::CopyToFloatBuffer(float* buffer) const
+{
+	Util::MemCopy(buffer, this, sizeof(float) * 4);
 }
 
 RGBAColor_u8 RGBAColor_f32::ToRGBA_u8() const
