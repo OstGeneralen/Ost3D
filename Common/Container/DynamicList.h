@@ -3,6 +3,16 @@
 #include <Common/DataDefinitions.h>
 #include <Common/Utility/MemAlloc.h>
 #include <new>
+#include <Common/Container/ContainerConfigs.h>
+
+#if DYNAMIC_LIST_ASSERTIONS
+#include <cassert>
+#define DYNAMIC_LIST_ASSERT(cond) assert(cond)
+#else
+#define DYNAMIC_LIST_ASSERT(cond)
+#endif // DYNAMIC_LIST_ASSERTIONS
+
+
 
 template<typename TElem>
 class TDynamicList
@@ -115,6 +125,8 @@ public:
 
 	void Remove(size_t atIdx)
 	{
+		DYNAMIC_LIST_ASSERT(atIdx < _usedSize);
+
 		if (c_invokeDtor)
 		{
 			_data[atIdx].~TElem();
@@ -150,19 +162,12 @@ public:
 		MemAlloc::FillMemory(cycleElemPtr, sizeof(TElem), 0);
 	}
 
-	TElem& operator[](size_t idx)
-	{
-		return _data[idx];
-	}
-
-	const TElem& operator[](size_t idx) const
-	{
-		return _data[idx];
-	}
+	TElem& operator[](size_t idx)  {  return GetElemAt(idx);  }
+	const TElem& operator[](size_t idx) const { return GetElemAt(idx); }
 
 	void Resize(size_t newSize)
 	{
-		if (newSize < _usedSize) throw std::exception(); // This aint good yo
+		DYNAMIC_LIST_ASSERT(newSize > _usedSize);
 
 		TElem* newBuff = MemAlloc::AllocTMemory<TElem>(newSize);
 		if (c_canMemCopy)
@@ -214,9 +219,53 @@ public:
 		return _reservedSize;
 	}
 
+	TElem& Last()
+	{
+		DYNAMIC_LIST_ASSERT(_usedSize > 0);
+		return GetElemAt(_usedSize - 1);
+	}
+	const TElem& Last() const
+	{
+		DYNAMIC_LIST_ASSERT(_usedSize > 0);
+		return GetElemAt(_usedSize - 1);
+	}
 
+	bool IsEmpty() const { return _usedSize == 0; }
+
+	bool TryPop(TElem& into)
+	{
+		if (IsEmpty()) return false;
+
+		TElem& lastElem = Last();
+
+		if (c_canMemCopy)
+		{
+			Util::MemCopyT<TElem>(&into, &lastElem, 1);
+		}
+		else if (c_assignMove)
+		{
+			into = Util::Move(lastElem);
+		}
+		else
+		{
+			into = lastElem;
+		}
+
+		Remove(_usedSize - 1);
+		return true;
+	}
 
 private:
+	TElem& GetElemAt(size_t idx) 
+	{ 
+		DYNAMIC_LIST_ASSERT(idx < _usedSize);
+		return _data[idx]; 
+	}
+	const TElem& GetElemAt(size_t idx) const 
+	{ 
+		DYNAMIC_LIST_ASSERT(idx < _usedSize);
+		return _data[idx]; 
+	}
 
 	TElem* _data;
 	size_t _usedSize;
