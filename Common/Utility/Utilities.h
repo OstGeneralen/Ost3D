@@ -37,4 +37,10 @@ namespace Util
 	}
 
 	extern void MemCopy(void* destination, const void* source, int size);
+
+	template<typename T>
+	void MemCopyT(T* destination, const T* source, size_t num)
+	{
+		MemCopy(destination, source, sizeof(T) * num);
+	}
 }
