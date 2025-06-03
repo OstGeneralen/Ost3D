@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Container\DynamicList.h" />
     <ClInclude Include="DataDefinitions.h" />
     <ClInclude Include="Math\CommonMath.h" />
     <ClInclude Include="Math\Mat3x3.h" />
@@ -147,6 +148,7 @@
     <ClInclude Include="Rendering\Color.h" />
     <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="Utility\EnumFlag.h" />
+    <ClInclude Include="Utility\MemAlloc.h" />
     <ClInclude Include="Utility\StringUtils.h" />
     <ClInclude Include="Utility\Utilities.h" />
   </ItemGroup>
@@ -158,6 +160,7 @@
     <ClCompile Include="Math\Vector3.cpp" />
     <ClCompile Include="Math\Vector4.cpp" />
     <ClCompile Include="Rendering\Color.cpp" />
+    <ClCompile Include="Utility\MemAlloc.cpp" />
     <ClCompile Include="Utility\StringUtils.cpp" />
     <ClCompile Include="Utility\Utilities.cpp" />
   </ItemGroup>
