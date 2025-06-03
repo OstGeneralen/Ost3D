@@ -137,6 +137,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Container\ContainerConfigs.h" />
+    <ClInclude Include="Container\ContainerElemOps.h" />
     <ClInclude Include="Container\DynamicList.h" />
     <ClInclude Include="DataDefinitions.h" />
     <ClInclude Include="Math\CommonMath.h" />

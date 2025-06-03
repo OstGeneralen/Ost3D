@@ -2,8 +2,8 @@
 #include <Common/Utility/Utilities.h>
 #include <Common/DataDefinitions.h>
 #include <Common/Utility/MemAlloc.h>
-#include <new>
 #include <Common/Container/ContainerConfigs.h>
+#include <Common/Container/ContainerElemOps.h>
 
 #if DYNAMIC_LIST_ASSERTIONS
 #include <cassert>
@@ -18,19 +18,11 @@ template<typename TElem>
 class TDynamicList
 {
 private:
-	constexpr static size_t c_elemSize = sizeof(TElem);
-	constexpr static bool c_invokeDtor = std::is_destructible<TElem>::value;
-
-	constexpr static bool c_canMemCopy = std::is_trivially_copyable<TElem>::value;
-
-	constexpr static bool c_ctorMove = std::is_move_constructible<TElem>::value;
-	constexpr static bool c_ctorCpy = std::is_copy_constructible<TElem>::value;
-
-	constexpr static bool c_assignMove = std::is_move_assignable<TElem>::value;
-	constexpr static bool c_assignCopy = std::is_copy_assignable<TElem>::value;
-
 	// If we cannot memcpy, move or copy construct we have no way to actually store this element type
-	static_assert(c_canMemCopy || c_ctorMove || c_ctorCpy);
+	static_assert(
+		ContainerUtil::TElementInfo<TElem>::MemCopyable ||
+		ContainerUtil::TElementInfo<TElem>::MoveConstruct ||
+		ContainerUtil::TElementInfo<TElem>::CopyConstruct);
 public:
 	TDynamicList() : TDynamicList(10u)
 	{
@@ -46,14 +38,8 @@ public:
 	TDynamicList(const TDynamicList& l)
 		: TDynamicList(l._reservedSize)
 	{
-		if (c_canMemCopy)
-		{
-			Util::MemCopy(_data, l._data, l._usedSize * sizeof(TElem));
-		}
-		else
-		{
-			// Copy
-		}
+		ContainerUtil::TElemOps<TElem>::CopyBuffer(l._data, _data, l._usedSize);
+		_usedSize = l._usedSize;
 	}
 
 	TDynamicList(TDynamicList&& l) noexcept
@@ -68,12 +54,7 @@ public:
 
 	~TDynamicList()
 	{
-		Clear();
-		if (_data)
-		{
-			delete[] _data;
-			_data = nullptr;
-		}
+		ClearAndReleaseCurrent();
 	}
 
 	TElem& Add(const TElem& e)
@@ -83,17 +64,9 @@ public:
 			Resize(_reservedSize * 2);
 		}
 
-		TElem* atPtr = &(_data[_usedSize]);
-		if (c_canMemCopy)
-		{
-			Util::MemCopy(atPtr, &e, sizeof(TElem));
-		}
-		else
-		{
-			new(atPtr) TElem(e);
-		}
+		ContainerUtil::TElemOps<TElem>::AddElement(_data[_usedSize], e);
 		_usedSize++;
-		return *atPtr;
+		return Last();
 	}
 
 	TElem& Add(TElem&& e)
@@ -103,10 +76,9 @@ public:
 			Resize(_reservedSize * 2);
 		}
 
-		TElem* atPtr = &(_data[_usedSize]);
-		new(atPtr) TElem(Util::Forward(e));
+		ContainerUtil::TElemOps<TElem>::AddElement(_data[_usedSize], Util::Forward(e));
 		_usedSize++;
-		return *atPtr;
+		return Last();
 	}
 
 	template<typename ... TArgs>
@@ -117,17 +89,16 @@ public:
 			Resize(_reservedSize * 2);
 		}
 
-		TElem* atPtr = &(_data[_usedSize]);
-		new(atPtr) TElem(args...);
+		ContainerUtil::TElemOps<TElem>::EmplaceElement(_data[_usedSize], args...);
 		_usedSize++;
-		return *atPtr;
+		return Last();
 	}
 
 	void Remove(size_t atIdx)
 	{
 		DYNAMIC_LIST_ASSERT(atIdx < _usedSize);
 
-		if (c_invokeDtor)
+		if (ContainerUtil::TElementInfo<TElem>::InvokeDtor)
 		{
 			_data[atIdx].~TElem();
 		}
@@ -140,67 +111,41 @@ public:
 
 
 		_usedSize--;
+
 		// Cyclic erase (move last element to location which we removed at)
-		TElem* cycleElemPtr = &(_data[_usedSize]);
-		TElem* newAddrPtr = &(_data[atIdx]);
-
-		if (c_canMemCopy)
-		{
-			Util::MemCopy(newAddrPtr, cycleElemPtr, sizeof(TElem));
-		}
-		else if (c_ctorMove)
-		{
-			TElem& cycleRef = *cycleElemPtr;
-			new(newAddrPtr) TElem(Util::Move(cycleRef));
-		}
-		else if (c_ctorCpy)
-		{
-			const TElem& cycleRef = *cycleElemPtr;
-			new(newAddrPtr) TElem(cycleRef);
-		}
-
-		MemAlloc::FillMemory(cycleElemPtr, sizeof(TElem), 0);
+		ContainerUtil::TElemOps<TElem>::MoveElement(_data[_usedSize], _data[atIdx]);
 	}
 
-	TElem& operator[](size_t idx)  {  return GetElemAt(idx);  }
+	TElem& operator[](size_t idx) { return GetElemAt(idx); }
 	const TElem& operator[](size_t idx) const { return GetElemAt(idx); }
+
+	void operator=(const TDynamicList& l)
+	{
+		Clear();
+		Resize(l._reservedSize);
+		_usedSize = l._usedSize;
+		ContainerUtil::TElemOps<TElem>::CopyBuffer(l._data, _data, _usedSize);
+	}
+
+	void operator=(TDynamicList&& l) noexcept
+	{
+		ClearAndReleaseCurrent();
+		Util::Swap(l._data, _data);
+		Util::Swap(l._reservedSize, _reservedSize);
+		Util::Swap(l._usedSize, _usedSize);
+	}
 
 	void Resize(size_t newSize)
 	{
 		DYNAMIC_LIST_ASSERT(newSize > _usedSize);
 
-		TElem* newBuff = MemAlloc::AllocTMemory<TElem>(newSize);
-		if (c_canMemCopy)
-		{
-			Util::MemCopyT<TElem>(newBuff, _data, _usedSize);
-		}
-		else if (c_ctorMove)
-		{
-			for (size_t moveElemIdx = 0; moveElemIdx < _usedSize; ++moveElemIdx)
-			{
-				TElem& sourceElem = _data[moveElemIdx];
-				TElem* destinationAddr = &(newBuff[moveElemIdx]);
-				new(destinationAddr) TElem(Util::Move(sourceElem));
-			}
-		}
-		else
-		{
-			for (size_t moveElemIdx = 0; moveElemIdx < _usedSize; ++moveElemIdx)
-			{
-				const TElem& sourceElem = _data[moveElemIdx];
-				TElem* destinationAddr = &(newBuff[moveElemIdx]);
-				new(destinationAddr) TElem(sourceElem);
-			}
-		}
-
+		_data = ContainerUtil::TElemOps<TElem>::ResizeBuffer(_data, _usedSize, _reservedSize, newSize);
 		_reservedSize = newSize;
-		delete[] _data;
-		_data = newBuff;
 	}
 
 	void Clear()
 	{
-		if (c_invokeDtor)
+		if (ContainerUtil::TElementInfo<TElem>::InvokeDtor)
 		{
 			for (size_t i = 0; i < _usedSize; ++i)
 			{
@@ -238,11 +183,11 @@ public:
 
 		TElem& lastElem = Last();
 
-		if (c_canMemCopy)
+		if (ContainerUtil::TElementInfo<TElem>::MemCopyable)
 		{
 			Util::MemCopyT<TElem>(&into, &lastElem, 1);
 		}
-		else if (c_assignMove)
+		else if (ContainerUtil::TElementInfo<TElem>::MoveAssign)
 		{
 			into = Util::Move(lastElem);
 		}
@@ -256,15 +201,26 @@ public:
 	}
 
 private:
-	TElem& GetElemAt(size_t idx) 
-	{ 
+	TElem& GetElemAt(size_t idx)
+	{
 		DYNAMIC_LIST_ASSERT(idx < _usedSize);
-		return _data[idx]; 
+		return _data[idx];
 	}
-	const TElem& GetElemAt(size_t idx) const 
-	{ 
+	const TElem& GetElemAt(size_t idx) const
+	{
 		DYNAMIC_LIST_ASSERT(idx < _usedSize);
-		return _data[idx]; 
+		return _data[idx];
+	}
+
+	void ClearAndReleaseCurrent()
+	{
+		Clear();
+		if (_data)
+		{
+			MemAlloc::ReleaseTMemory<TElem>(_data, _reservedSize);
+			_data = nullptr;
+			_reservedSize = 0;
+		}
 	}
 
 	TElem* _data;

@@ -12,50 +12,47 @@
 
 struct TestData
 {
+	TestData() = default;
 	TestData(int a, int b) : _a(a), _b(b){}
 	int _a, _b;
 };
 
-template<typename ... TArgs>
-void InstantiateTestData(TArgs&&... args)
+void PrintTestDataList(TDynamicList<TestData>& l, const char* desc)
 {
-	TestData t(args...);
+	std::cout << "OP: " << desc << std::endl;
+	std::cout << "  Size: " << l.Size() << " | Reserved Size: " << l.ReservedSize() << std::endl;
+	for (size_t i = 0; i < l.Size(); ++i)
+	{
+		std::cout << "    " << i << ". " << l[i]._a << " | " << l[i]._b << std::endl;
+	}
+	std::cout << std::endl;
 }
+
+
 
 int main(int argc, char* argv[])
 {
 	TDynamicList<TestData> testList(3);
 
-	testList.Add(TestData(10, 1.0f));
+	testList.Emplace(10, 1.0f);
 	testList.Emplace(20, 2.0f);
 	testList.Emplace(30, 3.0f);
-
-	std::cout << "Normal:" << std::endl;
-	std::cout << "Reserved Size " << testList.ReservedSize() << std::endl;
-	for (size_t t = 0; t < testList.Size(); ++t)
-	{
-		std::cout << testList[t]._a << " | " << testList[t]._b << std::endl;
-	}
-	std::cout << "\nPost Remove:" << std::endl;
-	std::cout << "Reserved Size " << testList.ReservedSize() << std::endl;
-	testList.Remove(0);
-	for (size_t t = 0; t < testList.Size(); ++t)
-	{
-		std::cout << testList[t]._a << " | " << testList[t]._b << std::endl;
-	}
-
-
 	testList.Emplace(40, 4.0f);
 	testList.Emplace(50, 5.0f);
-	testList.Emplace(60, 6.0f);
 
-	std::cout << "\nPost More Adds:" << std::endl;
-	std::cout << "Reserved Size " << testList.ReservedSize() << std::endl;
-	for (size_t t = 0; t < testList.Size(); ++t)
-	{
-		std::cout << testList[t]._a << " | " << testList[t]._b << std::endl;
-	}
+	PrintTestDataList(testList, "Initial");
 
+	TestData d;
+	bool result = testList.TryPop(d);
+	std::cout << "Pop result " << result << " (Popped: " << d._a << " | " << d._b << ")" << std::endl;
+	PrintTestDataList(testList, "Post Pop");
+
+	TDynamicList<TestData> movedToList;
+
+	movedToList = Util::Move(testList);
+
+	PrintTestDataList(testList, "Post copy");
+	PrintTestDataList(movedToList, "Copy into list");
 
 
 	return 0;
