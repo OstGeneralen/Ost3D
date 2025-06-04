@@ -19,6 +19,10 @@ namespace Math
 	extern float SquareRoot(float v);
 
 	extern bool FltEquals(float a, float b, float tolerance = Constants::FLT_Small);
+
+	// Safe equals operation that use FltEquals for float
+	template<typename T> static bool EqualsT(T a, T b) { return a == b; }
+	template<> static bool EqualsT<float>(float a, float b) { return FltEquals(a, b); }
 }
 
 // ------------------------------------------------------------
