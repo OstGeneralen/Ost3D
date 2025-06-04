@@ -1,10 +1,11 @@
 #pragma once
 #include <Windows.h>
+#include <Common/Math/VectorsGeneric.h>
 
 class Window
 {
 public:
-	Window(HINSTANCE instanceHandle, int cmdShw, int w, int h, const wchar_t* title);
+	Window(HINSTANCE instanceHandle, int cmdShw, const Dimensions& winDimensions, const wchar_t* title);
 	~Window() = default;
 
 	bool GetIsOpen() const;
@@ -13,11 +14,14 @@ public:
 	void ProcessEvents();
 
 	HWND GetHWND() const;
+
+	const Dimensions& GetDimensions() const;
+
 	unsigned int GetWidth() const;
 	unsigned int GetHeight() const;
 
 private:
 	HWND _windowHandle;
-	unsigned int _width, _height;
+	Dimensions _windowDimensions;
 	bool _open;
 };

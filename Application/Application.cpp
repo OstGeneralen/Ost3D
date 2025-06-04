@@ -1,34 +1,32 @@
 #include "Application.h"
-#include "DirectX/DXHandler.h"
+#include <Graphics/Rendering/RenderingFramework.h>
+#include <pix3.h>
 
 // ------------------------------------------------------------
 
 Application::Application(const AppRuntimeContext& context, int winW, int winH, const wchar_t* winT)
-	: _window{ static_cast<HINSTANCE>(context.GetInstanceHandle()), context.GetCmdLineOpt(), winW, winH, winT }
+	: _window{ static_cast<HINSTANCE>(context.GetInstanceHandle()), context.GetCmdLineOpt(), {winW, winH} , winT }
 {
 }
 
 void Application::Run()
 {
-	DXHandler dxHnd;
-
-	DXHandlerInitErrorFlag successFlag = dxHnd.Initialize(_window);
-
-	if (successFlag != DXHandlerErrors::Success)
+	IRenderFramework* renderFramework = Rendering::CreateFramework();
+	if (!renderFramework->Initialize(_window))
 	{
-		// Whaaaat?
-		dxHnd.Release();
 		return;
 	}
 
-	dxHnd.InitializeRendering();
+	IRenderer& renderer = renderFramework->GetRenderer();
+
 
 	while (_window.GetIsOpen())
 	{
 		_window.ProcessEvents();
+		renderer.BeginRenderFrame(RGBAColor_u8(50, 180, 255, 255));
+		renderer.EndRenderFrame();
+		renderer.PresentFrame();
 	}
-
-	dxHnd.Release();
 }
 
 // ------------------------------------------------------------

@@ -21,7 +21,7 @@ LRESULT CALLBACK WindowProcedure(HWND winHandle, UINT message, WPARAM wParam, LP
 	return DefWindowProc(winHandle, message, wParam, lParam);
 }
 
-Window::Window(HINSTANCE instanceHandle, int cmdShw, int w, int h, const wchar_t* title)
+Window::Window(HINSTANCE instanceHandle, int cmdShw, const Dimensions& winDimensions, const wchar_t* title)
 {
 	WNDCLASSEX windowClass;
 	ZeroMemory(&windowClass, sizeof(WNDCLASSEX));
@@ -42,7 +42,7 @@ Window::Window(HINSTANCE instanceHandle, int cmdShw, int w, int h, const wchar_t
 		title,
 		WS_OVERLAPPEDWINDOW,
 		300, 300,
-		w, h,
+		winDimensions.X, winDimensions.Y,
 		NULL, NULL,
 		instanceHandle,
 		NULL);
@@ -51,8 +51,7 @@ Window::Window(HINSTANCE instanceHandle, int cmdShw, int w, int h, const wchar_t
 	WindowHandleClassMap.insert({ _windowHandle, this });
 	_open = true;
 
-	_width = w;
-	_height = h;
+	_windowDimensions = winDimensions;
 }
 
 bool Window::GetIsOpen() const { return _open; }
@@ -76,12 +75,17 @@ HWND Window::GetHWND() const
 	return _windowHandle;
 }
 
+const Dimensions& Window::GetDimensions() const
+{
+	return _windowDimensions;
+}
+
 unsigned int Window::GetWidth() const
 {
-	return _width;
+	return _windowDimensions.X;
 }
 
 unsigned int Window::GetHeight() const
 {
-	return _height;
+	return _windowDimensions.Y;
 }

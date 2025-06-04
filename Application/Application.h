@@ -1,6 +1,6 @@
 #pragma once
-#include "Application/Window/Window.h"
 #include "Application/AppRuntimeContext.h"
+#include <Graphics/Window/Window.h>
 
 class Application
 {
