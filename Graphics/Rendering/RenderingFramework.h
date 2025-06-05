@@ -2,6 +2,7 @@
 #include <Graphics/Window/Window.h>
 #include <Graphics/Rendering/Shader.h>
 #include <Common/Rendering/Color.h>
+#include <Graphics/Rendering/RenderState.h>
 
 class IShaderCompiler
 {
@@ -18,6 +19,8 @@ public:
 	virtual void BeginRenderFrame(RGBAColor_u8 clearColor) = 0;
 	virtual void EndRenderFrame() = 0;
 	virtual void PresentFrame() = 0;
+
+	virtual IRenderState* CreateRenderState(const RenderStateDesc& desc) = 0;
 };
 
 class IRenderFramework

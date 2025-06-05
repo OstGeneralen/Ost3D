@@ -2,9 +2,6 @@
 #include "Application/Application.h"
 #include "Application/AppRuntimeContext.h"
 
-#pragma comment(lib, "Graphics_Debug")
-#pragma comment(lib, "Common_Debug")
-
 int WINAPI WinMain(
 	_In_ HINSTANCE instanceHandle,
 	_In_opt_ HINSTANCE previousInstanceHandle,

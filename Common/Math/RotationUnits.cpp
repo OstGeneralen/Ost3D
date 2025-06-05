@@ -31,7 +31,7 @@ Degrees& Degrees::operator=(float fv)
 }
 Degrees& Degrees::operator=(Radians rv)
 {
-	(*this) = rv;
+	(*this) = static_cast<Degrees>(rv);
 	return *this;
 }
 
@@ -64,6 +64,6 @@ Radians& Radians::operator=(float fv)
 }
 Radians& Radians::operator=(Degrees dv)
 {
-	(*this) = dv;
+	(*this) = static_cast<Radians>(dv);
 	return *this;
 }

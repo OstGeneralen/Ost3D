@@ -104,7 +104,7 @@ namespace ContainerUtil
 				new(&to) T(currCRef);
 			}
 
-			MemAlloc::FillMemory(&current, sizeof(T), 0);
+			MemAlloc::MemFillMemory(&current, sizeof(T), 0);
 		}
 
 		static void CopyBuffer(const T* source, T* dest, size_t elemCount)

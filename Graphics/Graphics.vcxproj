@@ -120,7 +120,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\;$(SolutionDir)ThirdParty\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,22 +140,28 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\;$(SolutionDir)ThirdParty\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DX\DXCore.h" />
     <ClInclude Include="DX\Framework.h" />
     <ClInclude Include="DX\Renderer.h" />
+    <ClInclude Include="DX\RenderState.h" />
     <ClInclude Include="DX\ShaderCompiler.h" />
+    <ClInclude Include="Rendering\Drawable.h" />
     <ClInclude Include="Rendering\RenderingFramework.h" />
+    <ClInclude Include="Rendering\RenderState.h" />
     <ClInclude Include="Rendering\Shader.h" />
     <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX\Framework.cpp" />
     <ClCompile Include="DX\Renderer.cpp" />
+    <ClCompile Include="DX\RenderState.cpp" />
     <ClCompile Include="DX\ShaderCompiler.cpp" />
+    <ClCompile Include="Rendering\Drawable.cpp" />
     <ClCompile Include="Rendering\RenderingFramework.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Framework.h"
+#include "RenderState.h"
 
 #include "../Window/Window.h"
 
@@ -32,29 +33,30 @@ void Renderer::BeginRenderFrame(RGBAColor_u8 clearColor)
 	D3D12_VIEWPORT vp{};
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	vp.Width = _windowSize.X;
-	vp.Height = _windowSize.Y;
-	_commandList->RSSetViewports(1, &vp);
+	vp.Width = static_cast<FLOAT>(_windowSize.X);
+	vp.Height = static_cast<FLOAT>(_windowSize.Y);
+	_commandList.Get()->RSSetViewports(1, &vp);
 
 	D3D12_RECT sr{};
 	sr.left = 0;
 	sr.right = 0;
 	sr.right = _windowSize.X;
 	sr.bottom = _windowSize.Y;
+	_commandList.Get()->RSSetScissorRects(1, &sr);
 
 	auto transitionToRenderTarget = CD3DX12_RESOURCE_BARRIER::Transition(
 		_renderTargets[_frameIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
-	_commandList->ResourceBarrier(1, &transitionToRenderTarget);
+	_commandList.Get()->ResourceBarrier(1, &transitionToRenderTarget);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), _frameIndex, _rtvHeapSize);
-	_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+	_commandList.Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
 	float cc[4];
 	clearColor.ToRGBA_f32().CopyToFloatBuffer(cc);
-	_commandList->ClearRenderTargetView(rtvHandle, cc, 0, nullptr);
+	_commandList.Get()->ClearRenderTargetView(rtvHandle, cc, 0, nullptr);
 }
 
 void DX::Renderer::EndRenderFrame()
@@ -65,28 +67,64 @@ void DX::Renderer::EndRenderFrame()
 		D3D12_RESOURCE_STATE_PRESENT
 	);
 
-	_commandList->ResourceBarrier(1, &transitionToPresent);
-	_commandList->Close();
+	_commandList.Get()->ResourceBarrier(1, &transitionToPresent);
+	_commandList.Get()->Close();
 }
 
 void DX::Renderer::PresentFrame()
 {
 	ID3D12CommandList* cmdListPP[] = { _commandList.Get() };
-	_commandQueue->ExecuteCommandLists(1, cmdListPP);
-	_swapChain->Present(1, 0);
+	_commandQueue.Get()->ExecuteCommandLists(1, cmdListPP);
+	_swapChain.Get()->Present(1, 0);
 
 	const auto currentFenceValue = _fenceValues[_frameIndex];
-	_commandQueue->Signal(_commandFence.Get(), currentFenceValue);
+	_commandQueue.Get()->Signal(_commandFence.Get(), currentFenceValue);
 	
-	_frameIndex = _swapChain->GetCurrentBackBufferIndex();
+	_frameIndex = _swapChain.Get()->GetCurrentBackBufferIndex();
 
-	if (_commandFence->GetCompletedValue() < _fenceValues[_frameIndex])
+	if (_commandFence.Get()->GetCompletedValue() < _fenceValues[_frameIndex])
 	{
 		// We have no ready buffer to render to so await the GPU to finish with it
-		_commandFence->SetEventOnCompletion(_fenceValues[_frameIndex], _fenceEvent);
+		_commandFence.Get()->SetEventOnCompletion(_fenceValues[_frameIndex], _fenceEvent);
 		WaitForSingleObjectEx(_fenceEvent, INFINITE, FALSE);
 	}
-	_fenceValues[_frameIndex] = _fenceValues[_frameIndex] + 1;
+	_fenceValues[_frameIndex] = currentFenceValue + 1;
+}
+
+void DX::Renderer::DrawRenderState(RenderState& state)
+{
+	state.RendererDraw(_commandList.Get());
+}
+
+IRenderState* Renderer::CreateRenderState(const RenderStateDesc& desc)
+{
+	return new RenderState( _framework );
+}
+
+ID3D12GraphicsCommandList* DX::Renderer::ResetAndGetCommandList()
+{
+	_commandAllocators[_frameIndex].Get()->Reset();
+	_commandList.Get()->Reset(_commandAllocators[_frameIndex].Get(), nullptr);
+	return _commandList.Get();
+}
+
+void DX::Renderer::RunCommandListAndAwaitGPUCompletion()
+{
+	_commandList.Get()->Close();
+
+	ID3D12CommandList* cmdLists[] = { _commandList.Get() };
+	_commandQueue.Get()->ExecuteCommandLists(1, cmdLists);
+
+	_commandQueue.Get()->Signal(_commandFence.Get(), _fenceValues[_frameIndex]);
+
+	if (_commandFence.Get()->GetCompletedValue() < _fenceValues[_frameIndex])
+	{
+		_commandFence.Get()->SetEventOnCompletion(_fenceValues[_frameIndex], _fenceEvent);
+
+		WaitForSingleObjectEx(_fenceEvent, INFINITE, FALSE);
+	}
+
+	_fenceValues[_frameIndex]++;
 }
 
 bool DX::Renderer::CreateCommandQueue()

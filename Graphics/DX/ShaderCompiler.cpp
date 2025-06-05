@@ -63,6 +63,6 @@ ShaderCompileInfo DX::ShaderCompiler::CompileShader(const char* path, EShaderTyp
 		return ShaderCompileInfo{ false, errMsg, CompiledShader() };
 	}
 
-	CompiledShader cs{ shaderType, shaderBlob, shaderBlob->GetBufferSize() };
+	CompiledShader cs{ shaderType, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize()};
 	return ShaderCompileInfo{ true, "", cs };
 }

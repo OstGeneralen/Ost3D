@@ -2,12 +2,14 @@
 #include <Graphics/DX/DXCore.h>
 #include <Common/Rendering/Color.h>
 #include <Graphics/Rendering/RenderingFramework.h>
+#include <Graphics/Rendering/RenderState.h>
 
 class Window;
 
 namespace DX
 {
 	class Framework;
+	class RenderState;
 
 	class Renderer : public IRenderer
 	{
@@ -20,6 +22,13 @@ namespace DX
 		void BeginRenderFrame( RGBAColor_u8 clearColor ) override;
 		void EndRenderFrame() override;
 		void PresentFrame() override;
+
+		void DrawRenderState(RenderState& state);
+
+		IRenderState* CreateRenderState(const RenderStateDesc& desc) override;
+
+		ID3D12GraphicsCommandList* ResetAndGetCommandList();
+		void RunCommandListAndAwaitGPUCompletion();
 	private:
 		bool CreateCommandQueue();
 		bool CreateSwapChain(const Window& targetWindow);
