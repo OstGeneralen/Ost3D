@@ -2,18 +2,30 @@
 #include <Common/Math/Vector4.h>
 #include <Common/Rendering/Color.h>
 
+using vertexFormatID_t = unsigned;
+
+namespace VertexFormats
+{
+	constexpr static vertexFormatID_t INVALID = 0x00000000;
+	constexpr static vertexFormatID_t fPos4_fCol4 = 0x00000001;
+}
+
+struct StaticVertexInfo
+{
+	void* InputElementsDesc{0};
+	unsigned NumInputElements{0};
+	vertexFormatID_t VertexFormatID{ VertexFormats::INVALID };
+};
+
 struct Vertex_Pos4_fCol4
 {
-public:
+	static StaticVertexInfo StaticVertexFormatInfo();
+	static vertexFormatID_t StaticVertexFormatID();
+
+	vertexFormatID_t VertexFormat() const;
+
 	Vector4f Position;
 	RGBAColor_f32 Color;
-
-public:
-	Vertex_Pos4_fCol4() = default;
-	Vertex_Pos4_fCol4(const Vertex_Pos4_fCol4&) = default;
-	Vertex_Pos4_fCol4(const Vector4f& p, const RGBAColor_f32& c) : Position{p} , Color{c} { }
-
-	Vertex_Pos4_fCol4& operator=(const Vertex_Pos4_fCol4&) = default;
 };
 
 // Define the basic vertex type

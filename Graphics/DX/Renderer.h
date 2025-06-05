@@ -3,13 +3,14 @@
 #include <Common/Rendering/Color.h>
 #include <Graphics/Rendering/RenderingFramework.h>
 #include <Graphics/Rendering/RenderState.h>
+#include <Common/Container/DynamicList.h>
+#include <Graphics/DX/RenderState.h>
 
 class Window;
 
 namespace DX
 {
 	class Framework;
-	class RenderState;
 
 	class Renderer : public IRenderer
 	{
@@ -23,9 +24,8 @@ namespace DX
 		void EndRenderFrame() override;
 		void PresentFrame() override;
 
-		void DrawRenderState(RenderState& state);
-
-		IRenderState* CreateRenderState(const RenderStateDesc& desc) override;
+		void ExecuteRenderState(const RenderStateHandle& handle) override;
+		RenderStateHandle CreateRenderState(const RenderStateDesc& desc) override;
 
 		ID3D12GraphicsCommandList* ResetAndGetCommandList();
 		void RunCommandListAndAwaitGPUCompletion();
@@ -56,6 +56,9 @@ namespace DX
 		ComPtr<ID3D12Fence> _commandFence;
 		unsigned long long _fenceValues[FrameCount] = {0,0};
 		
+		// States
+		TDynamicList<RenderState> _renderStates;
+
 		Framework* _framework;
 
 		Dimensions _windowSize;

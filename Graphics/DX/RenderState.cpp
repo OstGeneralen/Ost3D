@@ -13,14 +13,8 @@ DX::RenderState::RenderState(Framework* parentFramework)
 
 void DX::RenderState::Initialize(const RenderStateDesc& desc)
 {
-	D3D12_INPUT_ELEMENT_DESC inputDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA }
-	};
-
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
-	psoDesc.InputLayout = { inputDesc, 2 };
+	psoDesc.InputLayout = { static_cast<D3D12_INPUT_ELEMENT_DESC*>(desc.VertexFormatInfo.InputElementsDesc), desc.VertexFormatInfo.NumInputElements };
 	psoDesc.pRootSignature = _rootSignature.Get();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(desc.VertexShader.CompiledData, desc.VertexShader.CompiledDataSize);
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(desc.PixelShader.CompiledData, desc.PixelShader.CompiledDataSize);
@@ -35,19 +29,21 @@ void DX::RenderState::Initialize(const RenderStateDesc& desc)
 	psoDesc.SampleDesc.Count = 1;
 
 	_framework->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&_pipelineState));
+
+	_validVertexFormatID = desc.VertexFormatInfo.VertexFormatID;
 }
 
-void DX::RenderState::AddDrawable(IDrawable* drawable)
+bool DX::RenderState::AddDrawable(const Drawable& drawable)
 {
+	if (drawable.VertexFormatID != _validVertexFormatID)
+	{
+		return false;
+	}
+
 	DrawableData data{};
-	data.Drawable = drawable;
-	GenerateBufferViewAndResource(*drawable, data);
+	data.Instance = drawable;
+	GenerateBufferViewAndResource(drawable, data);
 	_drawables.Emplace(data);
-}
-
-void DX::RenderState::Execute()
-{
-	_renderer->DrawRenderState(*this);
 }
 
 void DX::RenderState::RendererDraw(ID3D12GraphicsCommandList* commandList)
@@ -60,7 +56,7 @@ void DX::RenderState::RendererDraw(ID3D12GraphicsCommandList* commandList)
 	for (size_t dIdx = 0; dIdx < _drawables.Size(); ++dIdx)
 	{
 		commandList->IASetVertexBuffers(0, 1, &(_drawables[dIdx].VertBufferView));
-		commandList->DrawInstanced(_drawables[dIdx].Drawable->VertexCount(), 1, 0, 0);
+		commandList->DrawInstanced(_drawables[dIdx].Instance.VertexCount, 1, 0, 0);
 	}
 }
 
@@ -80,7 +76,7 @@ void DX::RenderState::CreateRootSignature()
 		IID_PPV_ARGS(&_rootSignature));
 }
 
-void DX::RenderState::GenerateBufferViewAndResource(IDrawable& forDrawable, DrawableData& targetData)
+void DX::RenderState::GenerateBufferViewAndResource(const Drawable& forDrawable, DrawableData& targetData)
 {
 	auto device = _framework->GetDevice();
 	auto commandList = _renderer->ResetAndGetCommandList();
@@ -125,7 +121,7 @@ void DX::RenderState::GenerateBufferViewAndResource(IDrawable& forDrawable, Draw
 	void* gpuMapVertexData = nullptr;
 	D3D12_RANGE nilRange{ 0,0 };
 	uploadBuffer.Get()->Map(0, &nilRange, &gpuMapVertexData);
-	Util::MemCopy(gpuMapVertexData, forDrawable.DataStartAddress(), forDrawable.ByteSize());
+	Util::MemCopy(gpuMapVertexData, forDrawable.VertexDataBuffer, forDrawable.ByteSize());
 	uploadBuffer.Get()->Unmap(0, nullptr);
 
 	// 4. Copy data from upload buffer to gpu resource
@@ -146,6 +142,6 @@ void DX::RenderState::GenerateBufferViewAndResource(IDrawable& forDrawable, Draw
 
 	// 5. Create the view object
 	targetData.VertBufferView.BufferLocation = targetData.VertexBufferResource.Get()->GetGPUVirtualAddress();
-	targetData.VertBufferView.StrideInBytes = forDrawable.StrideSize();
+	targetData.VertBufferView.StrideInBytes = forDrawable.VertexSize;
 	targetData.VertBufferView.SizeInBytes = forDrawable.ByteSize();
 }

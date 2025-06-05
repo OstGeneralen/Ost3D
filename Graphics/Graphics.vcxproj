@@ -150,6 +150,7 @@
     <ClInclude Include="DX\Renderer.h" />
     <ClInclude Include="DX\RenderState.h" />
     <ClInclude Include="DX\ShaderCompiler.h" />
+    <ClInclude Include="DX\VertexFormatDescriptor.h" />
     <ClInclude Include="Rendering\Drawable.h" />
     <ClInclude Include="Rendering\RenderingFramework.h" />
     <ClInclude Include="Rendering\RenderState.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="DX\ShaderCompiler.cpp" />
     <ClCompile Include="Rendering\Drawable.cpp" />
     <ClCompile Include="Rendering\RenderingFramework.cpp" />
+    <ClCompile Include="Rendering\Vertex\Vertex.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

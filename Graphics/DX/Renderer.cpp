@@ -91,14 +91,17 @@ void DX::Renderer::PresentFrame()
 	_fenceValues[_frameIndex] = currentFenceValue + 1;
 }
 
-void DX::Renderer::DrawRenderState(RenderState& state)
+void DX::Renderer::ExecuteRenderState(const RenderStateHandle& handle)
 {
-	state.RendererDraw(_commandList.Get());
+	_renderStates[handle.GetStateID()].RendererDraw(_commandList.Get());
 }
 
-IRenderState* Renderer::CreateRenderState(const RenderStateDesc& desc)
+RenderStateHandle Renderer::CreateRenderState(const RenderStateDesc& desc)
 {
-	return new RenderState( _framework );
+	RenderState& nRenderState = _renderStates.Emplace(_framework);
+	nRenderState.Initialize(desc);
+
+	return RenderStateHandle{ nRenderState, _renderStates.Size() - 1 };
 }
 
 ID3D12GraphicsCommandList* DX::Renderer::ResetAndGetCommandList()

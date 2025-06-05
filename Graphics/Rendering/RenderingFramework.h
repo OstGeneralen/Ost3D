@@ -20,7 +20,9 @@ public:
 	virtual void EndRenderFrame() = 0;
 	virtual void PresentFrame() = 0;
 
-	virtual IRenderState* CreateRenderState(const RenderStateDesc& desc) = 0;
+	virtual void ExecuteRenderState(const RenderStateHandle& handle) = 0;
+
+	virtual RenderStateHandle CreateRenderState(const RenderStateDesc& desc) = 0;
 };
 
 class IRenderFramework

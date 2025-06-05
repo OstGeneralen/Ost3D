@@ -10,7 +10,7 @@ namespace DX
 
 	struct DrawableData
 	{
-		IDrawable* Drawable = nullptr;
+		Drawable Instance;
 		D3D12_VERTEX_BUFFER_VIEW VertBufferView = {};
 		ComPtr<ID3D12Resource> VertexBufferResource;
 	};
@@ -19,16 +19,15 @@ namespace DX
 	{
 	public:
 		RenderState(Framework* parentFramework);
-		void Initialize(const RenderStateDesc& desc) override;
-		void AddDrawable(IDrawable* drawable) override;
-		void Execute() override;
+		void Initialize(const RenderStateDesc& desc);
+		bool AddDrawable(const Drawable& drawable) override;
 
 		void RendererDraw(ID3D12GraphicsCommandList* commandList);
 
 	private:
 		void CreateRootSignature();
 
-		void GenerateBufferViewAndResource(IDrawable& forDrawable, DrawableData& targetData);
+		void GenerateBufferViewAndResource(const Drawable& forDrawable, DrawableData& targetData);
 
 		Framework* _framework;
 		Renderer* _renderer;
@@ -37,5 +36,7 @@ namespace DX
 		ComPtr<ID3D12PipelineState> _pipelineState;
 
 		TDynamicList<DrawableData> _drawables;
+
+		vertexFormatID_t _validVertexFormatID;
 	};
 }

@@ -31,32 +31,42 @@ void Application::Run()
 	RenderStateDesc stateDesc{};
 	stateDesc.VertexShader = vertexShader.Shader;
 	stateDesc.PixelShader = pixelShader.Shader;
+	stateDesc.VertexFormatInfo = Vertex_Pos4_fCol4::StaticVertexFormatInfo();
 
-	IRenderState* state = renderer.CreateRenderState(stateDesc);
-	state->Initialize(stateDesc);
+	RenderStateHandle state = renderer.CreateRenderState(stateDesc);
 
-	VertexDrawable vertTri;
-	vertTri
-		.SetVertexCount(3)
-		.AddVertex(Vertex{ {-1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f} })
-		.AddVertex(Vertex{ {-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} })
-		.AddVertex(Vertex{ {1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f} });
+	Vertex_Pos4_fCol4 triAVerts[] = {
+		{ {-1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f} },
+		{ {-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
+		{ {1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f} }
+	};
 
-	VertexDrawable vertTriTwo;
-	vertTriTwo
-		.SetVertexCount(3)
-		.AddVertex(Vertex{ {1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f} })
-		.AddVertex(Vertex{ {-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} })
-		.AddVertex(Vertex{ {1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.5f, 0.6f, 1.0f} });
+	Vertex_Pos4_fCol4 triBVerts[] = {
+		{{1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f} },
+		{ { -1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
+		{ {1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.5f, 0.6f, 1.0f} }
+	};
 
-	state->AddDrawable(&vertTri);
-	state->AddDrawable(&vertTriTwo);
+	Drawable triADrawable{};
+	triADrawable.VertexFormatID = Vertex_Pos4_fCol4::StaticVertexFormatID();
+	triADrawable.VertexSize = static_cast<unsigned>(sizeof(Vertex_Pos4_fCol4));
+	triADrawable.VertexCount = 3;
+	triADrawable.VertexDataBuffer = triAVerts;
+
+	Drawable triBDrawable{};
+	triBDrawable.VertexFormatID = Vertex_Pos4_fCol4::StaticVertexFormatID();
+	triBDrawable.VertexSize = static_cast<unsigned>(sizeof(Vertex_Pos4_fCol4));
+	triBDrawable.VertexCount = 3;
+	triBDrawable.VertexDataBuffer = triBVerts;
+
+	state.AddDrawable(triADrawable);
+	state.AddDrawable(triBDrawable);
 
 	while (_window.GetIsOpen())
 	{
 		_window.ProcessEvents();
 		renderer.BeginRenderFrame(RGBAColor_u8(50, 180, 255, 255));
-		state->Execute();
+		renderer.ExecuteRenderState(state);
 		renderer.EndRenderFrame();
 		renderer.PresentFrame();
 	}
