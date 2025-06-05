@@ -4,8 +4,12 @@
 
 #include "../Window/Window.h"
 
+#include <pix3.h>
+
 #define EXTRACT_FRAMEWORK_FACTORY *(_framework->GetFactory()) 
 #define EXTRACT_FRAMEWORK_DEVICE *(_framework->GetDevice()) 
+
+#define SCOPED_PIX_EVENT( name, code ) PIXBeginEvent(0xFF0000FF, name); code PIXEndEvent();
 
 using namespace DX;
 
@@ -15,6 +19,8 @@ bool DX::Renderer::Initialize(Framework* framework, const Window& targetWindow)
 	_framework = framework;
 
 	bool success = true;
+
+
 
 	if (success) success &= CreateCommandQueue();
 	if (success) success &= CreateSwapChain(targetWindow);
@@ -27,8 +33,17 @@ bool DX::Renderer::Initialize(Framework* framework, const Window& targetWindow)
 
 void Renderer::BeginRenderFrame(RGBAColor_u8 clearColor)
 {
-	_commandAllocators[_frameIndex].Get()->Reset();
-	_commandList.Get()->Reset(_commandAllocators[_frameIndex].Get(), nullptr);
+
+	unsigned long long currentFrameResourceIndex = _swapChain->GetCurrentBackBufferIndex();
+
+	if (_fenceValues[currentFrameResourceIndex] != 0 && _commandFence->GetCompletedValue() < _fenceValues[currentFrameResourceIndex])
+	{
+		_commandFence.Get()->SetEventOnCompletion(_fenceValues[currentFrameResourceIndex], _fenceEvent);
+		WaitForSingleObjectEx(_fenceEvent, INFINITE, FALSE);
+	}
+
+	_commandAllocators[currentFrameResourceIndex].Get()->Reset();
+	_commandList.Get()->Reset(_commandAllocators[currentFrameResourceIndex].Get(), nullptr);
 
 	D3D12_VIEWPORT vp{};
 	vp.TopLeftX = 0;
@@ -45,18 +60,20 @@ void Renderer::BeginRenderFrame(RGBAColor_u8 clearColor)
 	_commandList.Get()->RSSetScissorRects(1, &sr);
 
 	auto transitionToRenderTarget = CD3DX12_RESOURCE_BARRIER::Transition(
-		_renderTargets[_frameIndex].Get(),
+		_renderTargets[currentFrameResourceIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
 	_commandList.Get()->ResourceBarrier(1, &transitionToRenderTarget);
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), _frameIndex, _rtvHeapSize);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), currentFrameResourceIndex, _rtvHeapSize);
 	_commandList.Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
 	float cc[4];
 	clearColor.ToRGBA_f32().CopyToFloatBuffer(cc);
 	_commandList.Get()->ClearRenderTargetView(rtvHandle, cc, 0, nullptr);
+
+	_frameIndex = currentFrameResourceIndex;
 }
 
 void DX::Renderer::EndRenderFrame()
@@ -69,26 +86,30 @@ void DX::Renderer::EndRenderFrame()
 
 	_commandList.Get()->ResourceBarrier(1, &transitionToPresent);
 	_commandList.Get()->Close();
+
+	ID3D12CommandList* cmdListPP[] = { _commandList.Get() };
+	_commandQueue.Get()->ExecuteCommandLists(1, cmdListPP);
 }
 
 void DX::Renderer::PresentFrame()
 {
-	ID3D12CommandList* cmdListPP[] = { _commandList.Get() };
-	_commandQueue.Get()->ExecuteCommandLists(1, cmdListPP);
 	_swapChain.Get()->Present(1, 0);
 
-	const auto currentFenceValue = _fenceValues[_frameIndex];
-	_commandQueue.Get()->Signal(_commandFence.Get(), currentFenceValue);
-	
-	_frameIndex = _swapChain.Get()->GetCurrentBackBufferIndex();
+	//const auto currentFenceValue = _fenceValues[_frameIndex];
+	_commandQueue.Get()->Signal(_commandFence.Get(), _currentFenceValue);
+	_fenceValues[_frameIndex] = _currentFenceValue;
 
-	if (_commandFence.Get()->GetCompletedValue() < _fenceValues[_frameIndex])
-	{
-		// We have no ready buffer to render to so await the GPU to finish with it
-		_commandFence.Get()->SetEventOnCompletion(_fenceValues[_frameIndex], _fenceEvent);
-		WaitForSingleObjectEx(_fenceEvent, INFINITE, FALSE);
-	}
-	_fenceValues[_frameIndex] = currentFenceValue + 1;
+	//_frameIndex = _swapChain.Get()->GetCurrentBackBufferIndex();
+
+
+	//if (_fenceValues[_frameIndex] != 0 && _commandFence.Get()->GetCompletedValue() < _fenceValues[_frameIndex])
+	//{
+	//	// We have no ready buffer to render to so await the GPU to finish with it
+	//	_commandFence.Get()->SetEventOnCompletion(_fenceValues[_frameIndex], _fenceEvent);
+	//	WaitForSingleObjectEx(_fenceEvent, INFINITE, FALSE);
+	//}
+	_currentFenceValue++;
+	//_fenceValues[_frameIndex] = currentFenceValue + 1;
 }
 
 void DX::Renderer::ExecuteRenderState(const RenderStateHandle& handle)
@@ -98,7 +119,7 @@ void DX::Renderer::ExecuteRenderState(const RenderStateHandle& handle)
 
 RenderStateHandle Renderer::CreateRenderState(const RenderStateDesc& desc)
 {
-	RenderState& nRenderState = _renderStates.Emplace(_framework);
+	RenderState& nRenderState = _renderStates.Emplace(_framework, desc);
 	nRenderState.Initialize(desc);
 
 	return RenderStateHandle{ nRenderState, _renderStates.Size() - 1 };
@@ -118,16 +139,14 @@ void DX::Renderer::RunCommandListAndAwaitGPUCompletion()
 	ID3D12CommandList* cmdLists[] = { _commandList.Get() };
 	_commandQueue.Get()->ExecuteCommandLists(1, cmdLists);
 
-	_commandQueue.Get()->Signal(_commandFence.Get(), _fenceValues[_frameIndex]);
-
-	if (_commandFence.Get()->GetCompletedValue() < _fenceValues[_frameIndex])
+	unsigned long long pushFenceValue = _currentFenceValue;
+	_commandQueue.Get()->Signal(_commandFence.Get(), pushFenceValue);
+	_currentFenceValue++;
+	if (_commandFence.Get()->GetCompletedValue() < pushFenceValue)
 	{
-		_commandFence.Get()->SetEventOnCompletion(_fenceValues[_frameIndex], _fenceEvent);
-
+		_commandFence.Get()->SetEventOnCompletion(pushFenceValue, _fenceEvent);
 		WaitForSingleObjectEx(_fenceEvent, INFINITE, FALSE);
 	}
-
-	_fenceValues[_frameIndex]++;
 }
 
 bool DX::Renderer::CreateCommandQueue()
@@ -190,7 +209,7 @@ bool DX::Renderer::CreateRenderTargetViewHeap()
 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 	if (FAILED(
-		device.CreateDescriptorHeap( &desc, IID_PPV_ARGS(&_rtvHeap))
+		device.CreateDescriptorHeap(&desc, IID_PPV_ARGS(&_rtvHeap))
 	))
 	{
 		return false;
@@ -244,12 +263,12 @@ bool DX::Renderer::CreateGPUSyncObjects()
 	auto& device = EXTRACT_FRAMEWORK_DEVICE;
 
 	if (FAILED(
-		device.CreateFence(_fenceValues[_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_commandFence))
+		device.CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_commandFence))
 	))
 	{
 		return false;
 	}
-
+	_currentFenceValue = 1;
 	_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	return true;
 }

@@ -3,12 +3,13 @@
 #include "Renderer.h"
 #include <Common/Utility/Utilities.h>
 
-DX::RenderState::RenderState(Framework* parentFramework)
+DX::RenderState::RenderState(Framework* parentFramework, const RenderStateDesc& desc)
 	: _framework(parentFramework)
 	, _renderer(static_cast<Renderer*>(&(_framework->GetRenderer())))
 	//, _drawables(10)
 {
-	CreateRootSignature();
+	CreateRootSignature(desc);
+
 }
 
 void DX::RenderState::Initialize(const RenderStateDesc& desc)
@@ -20,8 +21,12 @@ void DX::RenderState::Initialize(const RenderStateDesc& desc)
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(desc.PixelShader.CompiledData, desc.PixelShader.CompiledDataSize);
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	psoDesc.DepthStencilState.DepthEnable = false;
+
+	psoDesc.DepthStencilState.DepthEnable = true;
+	psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
 	psoDesc.DepthStencilState.StencilEnable = false;
+	
 	psoDesc.SampleMask = UINT_MAX;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	psoDesc.NumRenderTargets = 1;
@@ -46,10 +51,21 @@ bool DX::RenderState::AddDrawable(const Drawable& drawable)
 	_drawables.Emplace(data);
 }
 
+void DX::RenderState::SetConstantBuffer(ConstantBuffer* buffer)
+{
+	_cBufPtr = buffer;
+}
+
 void DX::RenderState::RendererDraw(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootSignature(_rootSignature.Get());
 	commandList->SetPipelineState(_pipelineState.Get());
+
+	if (_cBufPtr != nullptr)
+	{
+		auto asResource = static_cast<ID3D12Resource*>(_cBufPtr->ResourcePtr);
+		commandList->SetGraphicsRootConstantBufferView(0, asResource->GetGPUVirtualAddress());
+	}
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -60,10 +76,21 @@ void DX::RenderState::RendererDraw(ID3D12GraphicsCommandList* commandList)
 	}
 }
 
-void DX::RenderState::CreateRootSignature()
+void DX::RenderState::CreateRootSignature(const RenderStateDesc& desc)
 {
+	// TODO: This definitely needs more flexibility
+	D3D12_ROOT_PARAMETER rootParams[1];
+	rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParams[0].Descriptor.ShaderRegister = 0;
+	rootParams[0].Descriptor.RegisterSpace = 0;
+	rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+
 	CD3DX12_ROOT_SIGNATURE_DESC rootDesc{};
-	rootDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootDesc.Init(
+		desc.HasConstantBuffer ? 1 : 0, 
+		desc.HasConstantBuffer ? rootParams : nullptr, 
+		0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> signatureBlob;
 	ComPtr<ID3DBlob> errorBlob;

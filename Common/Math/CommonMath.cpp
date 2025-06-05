@@ -10,7 +10,12 @@ float Math::Sin(Radians r)
 
 float Math::Cos(Radians r)
 {
-    return sinf(r.Value());
+    return cosf(r.Value());
+}
+
+float Math::Tan(Radians r)
+{
+    return tanf(r.Value());
 }
 
 float Math::SquareRoot(float v)

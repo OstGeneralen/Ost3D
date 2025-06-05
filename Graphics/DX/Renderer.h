@@ -55,6 +55,7 @@ namespace DX
 		HANDLE _fenceEvent;
 		ComPtr<ID3D12Fence> _commandFence;
 		unsigned long long _fenceValues[FrameCount] = {0,0};
+		unsigned long long _currentFenceValue = 0;
 		
 		// States
 		TDynamicList<RenderState> _renderStates;

@@ -3,6 +3,7 @@
 #include <Graphics/Rendering/Shader.h>
 #include <Common/Rendering/Color.h>
 #include <Graphics/Rendering/RenderState.h>
+#include <Graphics/Rendering/ConstantBuffer.h>
 
 class IShaderCompiler
 {
@@ -32,6 +33,8 @@ public:
 
 	virtual bool Initialize(const Window& forWindow) = 0;
 	virtual IRenderer& GetRenderer() = 0;
+
+	virtual bool MakeConstantBuffer(ConstantBuffer& buffer, unsigned bindRegister) = 0;
 };
 
 namespace Rendering

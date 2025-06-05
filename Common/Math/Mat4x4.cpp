@@ -80,6 +80,44 @@ Mat4x4& Mat4x4::Transpose()
 	return *this;
 }
 
+Mat4x4 Mat4x4::CreateView(const Vector3f eyeLocation, const Vector3f targetLocation, const Vector3f& up)
+{
+	const Vector3f axis_z = (targetLocation - eyeLocation).Normalized();
+	const Vector3f axis_x = (up.Cross(axis_z)).Normalized();
+	const Vector3f axis_y = up;
+
+	const float x_dot = eyeLocation.Dot(axis_x);
+	const float y_dot = eyeLocation.Dot(axis_y);
+	const float z_dot = eyeLocation.Dot(axis_z);
+
+	float m[]{
+		axis_x.X,	axis_y.X,	axis_z.X,	0,
+		axis_x.Y,	axis_y.Y,	axis_z.Y,	0,
+		axis_x.Z,	axis_y.Z,	axis_z.Z,	0,
+		-x_dot,		-y_dot,		-z_dot,		1
+	};
+
+	return Mat4x4(m);
+}
+
+Mat4x4 Mat4x4::CreatePerspective(Radians fovX, float aspect, float near, float far)
+{
+	float scale_x = 1.0f / Math::Tan(fovX.Value() / 2.0f);
+	float scale_y = scale_x * aspect;
+
+	float f = far / (far - near);
+	float n = (-near * far) / (far - near);
+
+	float m[]{
+		scale_x,	0,			0,			0,
+		0,			scale_y,	0,			0,
+		0,			0,			f,			1,
+		0,			0,			n,			0
+	};
+
+	return Mat4x4(m);
+}
+
 Mat4x4 Mat4x4::Inverse() const
 {
 	// Transformation Inverse
@@ -88,6 +126,11 @@ Mat4x4 Mat4x4::Inverse() const
 											Data[8], Data[9], Data[10]).Inverse();
 
 	return Mat4x4(transformationInverse, Vector3f{ -Data[12], -Data[13], -Data[14] });
+}
+
+Mat4x4 Mat4x4::GetTransposed() const
+{
+	return Mat4x4(*this).Transpose();
 }
 
 // ------------------------------------------------------------

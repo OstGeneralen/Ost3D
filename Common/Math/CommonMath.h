@@ -15,6 +15,7 @@ namespace Math
 
 	extern float Sin(Radians r);
 	extern float Cos(Radians r);
+	extern float Tan(Radians r);
 
 	extern float SquareRoot(float v);
 

@@ -18,14 +18,15 @@ namespace DX
 	class RenderState : public IRenderState
 	{
 	public:
-		RenderState(Framework* parentFramework);
+		RenderState(Framework* parentFramework, const RenderStateDesc& desc);
 		void Initialize(const RenderStateDesc& desc);
 		bool AddDrawable(const Drawable& drawable) override;
+		void SetConstantBuffer(ConstantBuffer* buffer ) override;
 
 		void RendererDraw(ID3D12GraphicsCommandList* commandList);
 
 	private:
-		void CreateRootSignature();
+		void CreateRootSignature(const RenderStateDesc& desc);
 
 		void GenerateBufferViewAndResource(const Drawable& forDrawable, DrawableData& targetData);
 
@@ -38,5 +39,7 @@ namespace DX
 		TDynamicList<DrawableData> _drawables;
 
 		vertexFormatID_t _validVertexFormatID;
+
+		ConstantBuffer* _cBufPtr{ nullptr };
 	};
 }

@@ -41,7 +41,12 @@ public: // Util
 public: // Ops
 	Mat4x4 operator*(const Mat4x4& m) const;
 	Mat4x4 Inverse() const;
+	Mat4x4 GetTransposed() const;
 	Mat4x4& Transpose();
+
+public: // Utility
+	static Mat4x4 CreateView(const Vector3f eyeLocation, const Vector3f targetLocation, const Vector3f& up);
+	static Mat4x4 CreatePerspective(Radians fovX, float aspect, float near, float far);
 };
 
 // ------------------------------------------------------------

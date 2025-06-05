@@ -2,6 +2,7 @@
 #include <Graphics/DX/DXCore.h>
 #include <Graphics/DX/Renderer.h>
 #include <Graphics/Rendering/RenderingFramework.h>
+#include <Graphics/Rendering/ConstantBuffer.h>
 
 class Window;
 
@@ -16,6 +17,8 @@ namespace DX
 
 		ID3D12Device* GetDevice();
 		IDXGIFactory4* GetFactory();
+
+		bool MakeConstantBuffer(ConstantBuffer& buffer, unsigned bindRegister);
 	private:
 		bool CreateFactoryAndDevice(unsigned factoryFlags);
 
