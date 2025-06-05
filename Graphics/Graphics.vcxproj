@@ -154,6 +154,7 @@
     <ClInclude Include="Rendering\RenderingFramework.h" />
     <ClInclude Include="Rendering\RenderState.h" />
     <ClInclude Include="Rendering\Shader.h" />
+    <ClInclude Include="Rendering\Vertex\Vertex.h" />
     <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <ItemGroup>

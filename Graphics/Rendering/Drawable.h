@@ -1,5 +1,5 @@
 #pragma once
-#include <Common/Rendering/Vertex.h>
+#include <Graphics/Rendering/Vertex/Vertex.h>
 
 struct IDrawable
 {

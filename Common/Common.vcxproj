@@ -149,7 +149,6 @@
     <ClInclude Include="Math\Vector4.h" />
     <ClInclude Include="Math\VectorsGeneric.h" />
     <ClInclude Include="Rendering\Color.h" />
-    <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="Utility\EnumFlag.h" />
     <ClInclude Include="Utility\MemAlloc.h" />
     <ClInclude Include="Utility\StringUtils.h" />
