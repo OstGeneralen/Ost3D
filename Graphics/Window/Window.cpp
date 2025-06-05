@@ -65,9 +65,12 @@ void Window::Close()
 void Window::ProcessEvents()
 {
 	MSG msg;
-	GetMessage(&msg, _windowHandle, 0, 0);
-	TranslateMessage(&msg);
-	DispatchMessage(&msg);
+
+	while(PeekMessage(&msg, _windowHandle, 0, 0, TRUE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 }
 
 HWND Window::GetHWND() const
