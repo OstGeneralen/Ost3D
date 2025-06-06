@@ -16,8 +16,11 @@ ost::dx::RenderingBackend g_renderBackend;
 
 #if ENGINE_GUI_ENABLED
 #include <Engine/Editor/EngineGUI/OnscreenLogViewer.h>
-ost::gui::OnscreenLogViewer g_onscreenLogViewer(8);
+#include <Engine/Editor/EngineGUI/FrameDetailsGUI.h>
 ost::editor::GUIHandler g_guiHandler;
+
+ost::gui::OnscreenLogViewer g_onscreenLogViewer(8);
+ost::gui::FrameDetailsGUI g_frameDetailsGUI;
 #endif
 
 STATIC_LOG(EngineLog);
@@ -53,6 +56,7 @@ void OstEngine::CreateAppWindow(const wchar_t* title, Dimensions windowDimension
 #if ENGINE_GUI_ENABLED
 	g_guiHandler.Init(_appWindow, g_renderBackend);
 	g_onscreenLogViewer.Initialize();
+	g_frameDetailsGUI.BindFPSTracker(_fpsTracker);
 #endif
 
 	EngineLog.LOG_CONFIRM("OstEngine Initialized");
@@ -65,12 +69,25 @@ bool ost::OstEngine::IsAppWindowOpen() const
 
 void ost::OstEngine::BeginFrame()
 {
+	float deltaTime = 0.0f;
+
+	if (_frameTimer.IsRunning())
+	{
+		_frameTimer.Stop();
+		deltaTime = _frameTimer.GetDurationSeconds();
+		_fpsTracker.AddSample(deltaTime);
+		_fpsTracker.TickTracker();
+	}
+	_frameTimer.Start();
+
+
 	_appWindow.ProcessEvents();
 	g_renderBackend.BeginFrame(RGBAColor_f32(0x101010FF));
 
 #if ENGINE_GUI_ENABLED
 	g_guiHandler.BeginGuiFrame();
 	g_onscreenLogViewer.Display();
+	g_frameDetailsGUI.Display();
 #endif
 }
 

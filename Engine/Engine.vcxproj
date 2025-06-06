@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Container\DynamicList.h" />
     <ClInclude Include="Container\Internal\ContainerElemOps.h" />
+    <ClInclude Include="Editor\EngineGUI\FrameDetailsGUI.h" />
     <ClInclude Include="Editor\EngineGUI\OnscreenLogViewer.h" />
     <ClInclude Include="Editor\GUIHandler.h" />
     <ClInclude Include="Editor\ImGui\imconfig.h" />
@@ -61,8 +62,12 @@
     <ClInclude Include="Utility\Logging\LogMessage.h" />
     <ClInclude Include="Utility\Memory\MemUtils.h" />
     <ClInclude Include="Utility\Ops.h" />
+    <ClInclude Include="Utility\Time\FPSTracker.h" />
+    <ClInclude Include="Utility\Time\SignalTimer.h" />
+    <ClInclude Include="Utility\Time\Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Editor\EngineGUI\FrameDetailsGUI.cpp" />
     <ClCompile Include="Editor\EngineGUI\OnscreenLogViewer.cpp" />
     <ClCompile Include="Editor\GUIHandler.cpp" />
     <ClCompile Include="Editor\ImGui\imgui.cpp" />
@@ -89,6 +94,9 @@
     <ClCompile Include="Utility\Logging\LogInstance.cpp" />
     <ClCompile Include="Utility\Logging\LogMessage.cpp" />
     <ClCompile Include="Utility\Memory\MemUtils.cpp" />
+    <ClCompile Include="Utility\Time\FPSTracker.cpp" />
+    <ClCompile Include="Utility\Time\SignalTimer.cpp" />
+    <ClCompile Include="Utility\Time\Timer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

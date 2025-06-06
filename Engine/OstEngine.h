@@ -4,6 +4,8 @@
 #include <Engine/Rendering/Window/Window.h>
 #include <Engine/Math/Vector/VectorsGeneric.h>
 #endif
+#include <Engine/Utility/Time/Timer.h>
+#include <Engine/Utility/Time/FPSTracker.h>
 
 
 namespace ost
@@ -22,5 +24,7 @@ namespace ost
 		void EndFrame();
 	private:
 		Window _appWindow;
+		Timer _frameTimer;
+		FPSTracker _fpsTracker{10, 0.5f};
 	};
 }

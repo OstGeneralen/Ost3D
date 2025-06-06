@@ -2,6 +2,7 @@
 #include <Engine/Utility/Logging/LoggingContext.h>
 #include <Engine/Editor/ImGui/imgui.h>
 #include <Engine/Utility/Logging/LogFormatting.h>
+#include "FrameDetailsGUI.h"
 
 namespace
 {
