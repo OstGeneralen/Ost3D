@@ -10,6 +10,8 @@ bool RenderingBackend::InitializeForWindow(const Window& targetWindow)
 	if (success) success &= CreateCommandQueue();
 	if (success) success &= CreateSwapChain(targetWindow);
 	if (success) success &= CreateRenderTargetViewHeap();
+	if (success) success &= CreateShaderResourceViewHeap(_srvActiveHeap, true, 128);
+	if (success) success &= CreateShaderResourceViewHeap(_srvGUIHeap, true, 128);
 	if (success) success &= CreateCommandList();
 	if (success) success &= CreateGPUSyncObjects();
 
@@ -31,6 +33,30 @@ void RenderingBackend::ExecuteQueuedCommandsAndAwaitGPU()
 		_commandFence.Get()->SetEventOnCompletion(pushFenceValue, _bufferFenceEvent);
 		WaitForSingleObjectEx(_bufferFenceEvent, INFINITE, FALSE);
 	}
+}
+
+void RenderingBackend::Release()
+{
+	AwaitGPU();
+
+	_commandFence.Reset();
+	
+	for (int i = 0; i < BufferingNum; ++i)
+	{
+		_commandAllocators[i].Reset();
+		_renderTargets[i].Reset();
+	}
+	
+	_commandList.Reset();
+	_commandQueue.Reset();
+
+	_srvActiveHeap.Reset();
+	_srvStagingHeap.Reset();
+	_rtvHeap.Reset();
+	
+	_swapchain.Reset();
+	_device.Reset();
+	_factory.Reset();
 }
 
 // ------------------------------------------------------------
@@ -77,6 +103,9 @@ void RenderingBackend::BeginFrame(RGBAColor_f32 clearColor)
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart(), currentFrameResourceIndex, _rtvHeapSize);
 	_commandList.Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
+	ID3D12DescriptorHeap* dh[]{ _srvActiveHeap.Get() };
+	_commandList->SetDescriptorHeaps(1, dh);
+
 	float cc[4];
 	clearColor.CopyToFloatBuffer(cc);
 	_commandList.Get()->ClearRenderTargetView(rtvHandle, cc, 0, nullptr);
@@ -115,7 +144,22 @@ void RenderingBackend::EndAndPresentFrame()
 
 bool RenderingBackend::CreateFactoryAndDevice()
 {
-	if (FAILED(CreateDXGIFactory2(0, IID_PPV_ARGS(&_factory))))
+
+	unsigned factoryFlags = 0;
+#if _DEBUG
+	ID3D12Debug* debugPtr;
+	if (FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugPtr))))
+	{
+		return false;
+	}
+	else
+	{
+		debugPtr->EnableDebugLayer();
+		factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+	}
+#endif
+
+	if (FAILED(CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&_factory))))
 	{
 		return false;
 	}
@@ -145,7 +189,7 @@ bool RenderingBackend::CreateSwapChain(const Window& targetWindow)
 	desc.BufferCount = BufferingNum;
 	desc.Width = targetWindow.GetDimensions().X;
 	desc.Height = targetWindow.GetDimensions().Y;
-	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.Format = _rtvFormat;
 	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	desc.SampleDesc.Count = 1;
@@ -207,6 +251,38 @@ bool RenderingBackend::CreateRenderTargetViewHeap()
 	return true;
 }
 
+bool ost::dx::RenderingBackend::CreateShaderResourceViewHeap(ComPtr<ID3D12DescriptorHeap>& heapPtr, bool shaderVisible, unsigned numDescs)
+{
+	D3D12_DESCRIPTOR_HEAP_DESC desc{};
+	desc.NumDescriptors = numDescs;
+	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+
+	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	if (shaderVisible)
+	{
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	}
+
+	desc.NodeMask = 0;
+
+	if (FAILED(_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heapPtr))))
+	{
+		return false;
+	}
+
+	if (shaderVisible)
+	{
+		heapPtr->SetName(L"Active SRV Heap");
+	}
+	else
+	{
+		heapPtr->SetName(L"Staging SRV Heap");
+	}
+	_srvHeapSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	return true;
+}
+
 bool RenderingBackend::CreateCommandList()
 {
 	if (FAILED(
@@ -261,5 +337,15 @@ IDXGIAdapter1* RenderingBackend::RequestHardwareAdapter()
 	}
 
 	return nullptr;
+}
+
+void ost::dx::RenderingBackend::AwaitGPU()
+{
+	_commandQueue->Signal(_commandFence.Get(), _commandFenceValues[_bufferIndex]);
+
+	_commandFence->SetEventOnCompletion(_commandFenceValues[_bufferIndex], _bufferFenceEvent);
+	WaitForSingleObjectEx(_bufferFenceEvent, INFINITE, FALSE);
+
+	_commandFenceValues[_bufferIndex]++;
 }
 

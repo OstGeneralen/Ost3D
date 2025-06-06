@@ -2,19 +2,19 @@
 #include <Windows.h>
 #include <unordered_map>
 #include <Engine/Rendering/WindowsInfo.h>
-//#include <Engine/Editor/ImGui/imgui_impl_win32.h>
+#include <Engine/Editor/ImGui/imgui_impl_win32.h>
 
 std::unordered_map<void*, ost::Window*> WindowHandleClassMap;
 const LPCWSTR WndClassName = L"OstWindowClass";
 
 using namespace ost;
 
-//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 LRESULT CALLBACK WindowProcedure(HWND winHandle, UINT message, WPARAM wParam, LPARAM  lParam)
 {
-	//if (ImGui_ImplWin32_WndProcHandler(winHandle, message, wParam, lParam))
-	//	return true;
+	if (ImGui_ImplWin32_WndProcHandler(winHandle, message, wParam, lParam))
+		return true;
 
 	switch (message)
 	{
