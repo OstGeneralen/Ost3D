@@ -1,8 +1,6 @@
 #pragma once
 #include <Windows.h>
 #include <Engine/Math/Vector/VectorsGeneric.h>
-#include <Engine/Rendering/Window/WindowEventListener.h>
-#include <unordered_set>
 #include <Engine/Utility/Events/Event.h>
 
 namespace ost

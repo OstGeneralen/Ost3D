@@ -54,7 +54,6 @@
     <ClInclude Include="Rendering\Shader\Shader.h" />
     <ClInclude Include="Rendering\Window\Window.h" />
     <ClInclude Include="Rendering\WindowsInfo.h" />
-    <ClInclude Include="Rendering\Window\WindowEventListener.h" />
     <ClInclude Include="Utility\EnumFlag.h" />
     <ClInclude Include="Utility\Events\Event.h" />
     <ClInclude Include="Utility\Logging\ILogListener.h" />
