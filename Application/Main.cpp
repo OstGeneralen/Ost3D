@@ -1,6 +1,7 @@
+#pragma comment(lib, "Engine_Debug")
+
 #include <Windows.h>
-#include "Application/Application.h"
-#include "Application/AppRuntimeContext.h"
+#include <Engine/OstEngine.h>
 
 int WINAPI WinMain(
 	_In_ HINSTANCE instanceHandle,
@@ -8,8 +9,14 @@ int WINAPI WinMain(
 	_In_ LPSTR commandLine,
 	_In_ int commandLineShow)
 {
-	AppRuntimeContext runtimeContext{instanceHandle, commandLineShow};
-	Application app(runtimeContext, 800, 800, L"Test Window");
-	app.Run();
+	ost::OstEngine engine(instanceHandle, commandLine, commandLineShow);
+	engine.CreateAppWindow(L"OstEngine Window", { 1920, 1080 });
+	
+	while (engine.IsAppWindowOpen())
+	{
+		engine.BeginFrame();
+		engine.EndFrame();
+	}
+
 	return 0;
 }

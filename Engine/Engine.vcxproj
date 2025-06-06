@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -18,11 +18,52 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Container\DynamicList.h" />
+    <ClInclude Include="Container\Internal\ContainerElemOps.h" />
+    <ClInclude Include="Math\CommonMath.h" />
+    <ClInclude Include="Math\Matrix\Mat3x3.h" />
+    <ClInclude Include="Math\Matrix\Mat4x4.h" />
+    <ClInclude Include="Math\RotationUnits.h" />
+    <ClInclude Include="Math\Vector\Vector3.h" />
+    <ClInclude Include="Math\Vector\Vector4.h" />
+    <ClInclude Include="Math\Vector\VectorsGeneric.h" />
+    <ClInclude Include="OstEngine.h" />
+    <ClInclude Include="OstEngineCore.h" />
+    <ClInclude Include="OstEngineTypedefs.h" />
+    <ClInclude Include="Rendering\Color\Color.h" />
+    <ClInclude Include="Rendering\DX\DXCore.h" />
+    <ClInclude Include="Rendering\DX\RenderingBackend.h" />
+    <ClInclude Include="Rendering\DX\ShaderCompiler.h" />
+    <ClInclude Include="Rendering\Shader\IShaderCompiler.h" />
+    <ClInclude Include="Rendering\RenderingContext.h" />
+    <ClInclude Include="Rendering\Shader\Shader.h" />
+    <ClInclude Include="Rendering\Window\Window.h" />
+    <ClInclude Include="Rendering\WindowsInfo.h" />
+    <ClInclude Include="Utility\EnumFlag.h" />
+    <ClInclude Include="Utility\Memory\MemUtils.h" />
+    <ClInclude Include="Utility\Ops.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Math\CommonMath.cpp" />
+    <ClCompile Include="Math\Matrix\Mat3x3.cpp" />
+    <ClCompile Include="Math\Matrix\Mat4x4.cpp" />
+    <ClCompile Include="Math\RotationUnits.cpp" />
+    <ClCompile Include="Math\Vector\Vector3.cpp" />
+    <ClCompile Include="Math\Vector\Vector4.cpp" />
+    <ClCompile Include="OstEngine.cpp" />
+    <ClCompile Include="Rendering\Color\Color.cpp" />
+    <ClCompile Include="Rendering\DX\RenderingBackend.cpp" />
+    <ClCompile Include="Rendering\DX\ShaderCompiler.cpp" />
+    <ClCompile Include="Rendering\WindowsInfo.cpp" />
+    <ClCompile Include="Rendering\Window\Window.cpp" />
+    <ClCompile Include="Utility\Memory\MemUtils.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a4f4a4d7-a82e-41e6-bc23-2cbba1b7bc61}</ProjectGuid>
-    <RootNamespace>Application</RootNamespace>
+    <ProjectGuid>{396760b4-930b-4274-949a-335441e54066}</ProjectGuid>
+    <RootNamespace>Engine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -40,13 +81,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -71,14 +112,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)Bin\</OutDir>
-    <IntDir>$(SolutionDir)BuildFiles\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Lib\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)BuildFiles\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)Bin\</OutDir>
-    <IntDir>$(SolutionDir)BuildFiles\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Lib\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)BuildFiles\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -112,11 +153,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\Include\;$(ProjectDir)Include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)ThirdParty\Include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Lib\;$(SolutionDir)ThirdParty\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -129,29 +170,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\Include\;$(ProjectDir)Include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)ThirdParty\Include\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Lib\;$(SolutionDir)ThirdParty\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets'))" />
-  </Target>
 </Project>
