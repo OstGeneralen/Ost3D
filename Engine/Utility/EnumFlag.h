@@ -22,6 +22,18 @@ namespace ost
 		return static_cast<T>(static_cast<unsigned>(l) | static_cast<unsigned>(r));
 	}
 
+	template<FlagEnumType T>
+	T operator&(T l, T r)
+	{
+		return static_cast<T>(static_cast<unsigned>(l) & static_cast<unsigned>(r));
+	}
+
+	template<FlagEnumType T>
+	T operator~(T f)
+	{
+		return static_cast<T>(~static_cast<unsigned>(f));
+	}
+
 	// Flags utility type to help with checking for flags
 	template<FlagEnumType T>
 	struct Flags

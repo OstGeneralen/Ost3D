@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Container\DynamicList.h" />
     <ClInclude Include="Container\Internal\ContainerElemOps.h" />
+    <ClInclude Include="Editor\EngineGUI\OnscreenLogViewer.h" />
     <ClInclude Include="Editor\GUIHandler.h" />
     <ClInclude Include="Editor\ImGui\imconfig.h" />
     <ClInclude Include="Editor\ImGui\imgui.h" />
@@ -51,10 +52,18 @@
     <ClInclude Include="Rendering\Window\Window.h" />
     <ClInclude Include="Rendering\WindowsInfo.h" />
     <ClInclude Include="Utility\EnumFlag.h" />
+    <ClInclude Include="Utility\Logging\ILogListener.h" />
+    <ClInclude Include="Utility\Logging\LogFormatting.h" />
+    <ClInclude Include="Utility\Logging\Logging.h" />
+    <ClInclude Include="Utility\Logging\LoggingContext.h" />
+    <ClInclude Include="Utility\Logging\LogInstance.h" />
+    <ClInclude Include="Utility\Logging\LogLevel.h" />
+    <ClInclude Include="Utility\Logging\LogMessage.h" />
     <ClInclude Include="Utility\Memory\MemUtils.h" />
     <ClInclude Include="Utility\Ops.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Editor\EngineGUI\OnscreenLogViewer.cpp" />
     <ClCompile Include="Editor\GUIHandler.cpp" />
     <ClCompile Include="Editor\ImGui\imgui.cpp" />
     <ClCompile Include="Editor\ImGui\imgui_demo.cpp" />
@@ -75,6 +84,10 @@
     <ClCompile Include="Rendering\DX\ShaderCompiler.cpp" />
     <ClCompile Include="Rendering\WindowsInfo.cpp" />
     <ClCompile Include="Rendering\Window\Window.cpp" />
+    <ClCompile Include="Utility\Logging\LogFormatting.cpp" />
+    <ClCompile Include="Utility\Logging\LoggingContext.cpp" />
+    <ClCompile Include="Utility\Logging\LogInstance.cpp" />
+    <ClCompile Include="Utility\Logging\LogMessage.cpp" />
     <ClCompile Include="Utility\Memory\MemUtils.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

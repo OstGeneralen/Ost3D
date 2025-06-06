@@ -10,12 +10,17 @@
 #include <Engine/Rendering/DX/RenderingBackend.h>
 #include <Engine/Editor/GUIHandler.h>
 #include <Engine/Editor/ImGui/imgui.h>
+#include <Engine/Utility/Logging/Logging.h>
 
 ost::dx::RenderingBackend g_renderBackend;
 
 #if ENGINE_GUI_ENABLED
+#include <Engine/Editor/EngineGUI/OnscreenLogViewer.h>
+ost::gui::OnscreenLogViewer g_onscreenLogViewer(8);
 ost::editor::GUIHandler g_guiHandler;
 #endif
+
+STATIC_LOG(EngineLog);
 
 using namespace ost;
 
@@ -34,16 +39,23 @@ ost::OstEngine::~OstEngine()
 	g_guiHandler.Uninit();
 #endif
 	g_renderBackend.Release();
+
+	log::LoggingContext::Uninitialize();
 }
 
 void OstEngine::CreateAppWindow(const wchar_t* title, Dimensions windowDimensions)
 {
+	log::LoggingContext::Initialize();
+
 	_appWindow.Create(title, windowDimensions);
 	g_renderBackend.InitializeForWindow(_appWindow);
 
 #if ENGINE_GUI_ENABLED
 	g_guiHandler.Init(_appWindow, g_renderBackend);
+	g_onscreenLogViewer.Initialize();
 #endif
+
+	EngineLog.LOG_CONFIRM("OstEngine Initialized");
 }
 
 bool ost::OstEngine::IsAppWindowOpen() const
@@ -58,11 +70,7 @@ void ost::OstEngine::BeginFrame()
 
 #if ENGINE_GUI_ENABLED
 	g_guiHandler.BeginGuiFrame();
-
-	ImGui::Begin("This is a test", nullptr, ImGuiWindowFlags_NoSavedSettings);
-	ImGui::Text("Heres some text for you");
-	ImGui::Button("A button");
-	ImGui::End();
+	g_onscreenLogViewer.Display();
 #endif
 }
 
