@@ -4,7 +4,6 @@ using namespace ost::dx;
 
 ost::dx::RenderingBackend::RenderingBackend()
 {
-	_winEventListener.ResizeCallback = [&](Dimensions d) {ProcessWindowResize(d); };
 }
 
 bool RenderingBackend::InitializeForWindow(Window& targetWindow)
@@ -20,7 +19,7 @@ bool RenderingBackend::InitializeForWindow(Window& targetWindow)
 	if (success) success &= CreateCommandList();
 	if (success) success &= CreateGPUSyncObjects();
 
-	targetWindow.RegisterEventListener(&_winEventListener);
+	_windowResizeEventListener = targetWindow.Event_Resize.Listen([this](const auto& d) { ProcessWindowResize(d); });
 
 	return success;
 }
@@ -44,6 +43,8 @@ void RenderingBackend::ExecuteQueuedCommandsAndAwaitGPU()
 
 void RenderingBackend::Release()
 {
+	_windowResizeEventListener.Reset();
+
 	AwaitGPU();
 
 	_commandFence.Reset();
@@ -375,7 +376,7 @@ void ost::dx::RenderingBackend::DisplayGUI()
 	}
 }
 
-void ost::dx::RenderingBackend::ProcessWindowResize(Dimensions newSize)
+void ost::dx::RenderingBackend::ProcessWindowResize(const Dimensions& newSize)
 {
 	AwaitGPU();
 

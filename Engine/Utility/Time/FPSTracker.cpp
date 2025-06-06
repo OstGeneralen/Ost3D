@@ -1,4 +1,7 @@
 #include "FPSTracker.h"
+#include <Engine/Utility/Logging/Logging.h>
+
+STATIC_LOG(FpsTrackLog);
 
 ost::FPSTracker::FPSTracker(size_t sampleSize, float sampleUpdateFreq)
 	: _resampleTimer( sampleUpdateFreq )
@@ -6,9 +9,15 @@ ost::FPSTracker::FPSTracker(size_t sampleSize, float sampleUpdateFreq)
 	, _numSamples{sampleSize}
 	, _writeSample{0}
 	, _calculatedFPS{0}
+	, _fpsTolerance{30}
 {
 	_resampleTimer.SetSignalFunction([&] {Resample(); });
 	_resampleTimer.Start();
+}
+
+void ost::FPSTracker::SetTolerance(float warnBelow)
+{
+	_fpsTolerance = warnBelow;
 }
 
 void ost::FPSTracker::TickTracker()
@@ -27,6 +36,11 @@ float ost::FPSTracker::GetCurrentFramesPerSeconds() const
 	return _calculatedFPS;
 }
 
+float ost::FPSTracker::GetCurrentFrameTimeAverage() const
+{
+	return _frameTimeAverage;
+}
+
 void ost::FPSTracker::Resample()
 {
 	float samplesTotal = 0.0f;
@@ -35,7 +49,12 @@ void ost::FPSTracker::Resample()
 		samplesTotal += _samples[i];
 	}
 
-	float samplesAverage = samplesTotal / static_cast<float>(_numSamples);
+	_frameTimeAverage = samplesTotal / static_cast<float>(_numSamples);
 
-	_calculatedFPS = 1.0f / samplesAverage;
+	_calculatedFPS = 1.0f / _frameTimeAverage;
+
+	if (_calculatedFPS <= _fpsTolerance)
+	{
+		FpsTrackLog.LOG_WARNING("Framerate below the set tolerance detected (Recorded FPS: {}, Tolerance: {})", _calculatedFPS, _fpsTolerance);
+	}
 }

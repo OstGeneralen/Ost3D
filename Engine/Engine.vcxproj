@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClInclude Include="Container\DynamicList.h" />
     <ClInclude Include="Container\Internal\ContainerElemOps.h" />
+    <ClInclude Include="Container\SparseList.h" />
+    <ClInclude Include="Editor\DeveloperGUI.h" />
     <ClInclude Include="Editor\EngineGUI\FrameDetailsGUI.h" />
     <ClInclude Include="Editor\EngineGUI\OnscreenLogViewer.h" />
     <ClInclude Include="Editor\GUIHandler.h" />
@@ -54,6 +56,7 @@
     <ClInclude Include="Rendering\WindowsInfo.h" />
     <ClInclude Include="Rendering\Window\WindowEventListener.h" />
     <ClInclude Include="Utility\EnumFlag.h" />
+    <ClInclude Include="Utility\Events\Event.h" />
     <ClInclude Include="Utility\Logging\ILogListener.h" />
     <ClInclude Include="Utility\Logging\LogFormatting.h" />
     <ClInclude Include="Utility\Logging\Logging.h" />

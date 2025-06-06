@@ -60,8 +60,7 @@ GUISRVHeapAllocator guiSrvAllocator;
 
 void ost::editor::GUIHandler::Init(Window& appWindow, const dx::RenderingBackend& renderBackend)
 {
-	_winEventListener.ResizeCallback = [&](auto d) {ProcessWindowResize(d); };
-	appWindow.RegisterEventListener(&_winEventListener);
+	_windowResizeListener = appWindow.Event_Resize.Listen([this](const auto& d) {ProcessWindowResize(d); });
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -93,6 +92,8 @@ void ost::editor::GUIHandler::Init(Window& appWindow, const dx::RenderingBackend
 
 void ost::editor::GUIHandler::Uninit()
 {
+	_windowResizeListener.Reset();
+
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
@@ -114,7 +115,7 @@ void ost::editor::GUIHandler::EndGuiFrame(const dx::RenderingBackend& renderBack
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), renderBackend.GetCommandList());
 }
 
-void ost::editor::GUIHandler::ProcessWindowResize(Dimensions newDim)
+void ost::editor::GUIHandler::ProcessWindowResize(const Dimensions& newDim)
 {
 	_windowDimensions = newDim;
 }

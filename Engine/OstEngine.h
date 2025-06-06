@@ -22,6 +22,8 @@ namespace ost
 
 		void BeginFrame();
 		void EndFrame();
+
+		void Shutdown();
 	private:
 		Window _appWindow;
 		Timer _frameTimer;

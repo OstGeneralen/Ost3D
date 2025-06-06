@@ -103,3 +103,10 @@ void ost::OstEngine::EndFrame()
 #endif
 	g_renderBackend.EndAndPresentFrame();
 }
+
+
+void ost::OstEngine::Shutdown()
+{
+	g_guiHandler.Uninit();
+	g_renderBackend.Release();
+}

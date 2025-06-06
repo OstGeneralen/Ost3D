@@ -46,6 +46,10 @@ void ost::gui::FrameDetailsGUI::Display()
 
 		ImGui::TextColored(valueColor, "%.2f", _fpsTracker->GetCurrentFramesPerSeconds());
 	}
+	ImGui::Text("Frame Time (avg ms):");
+	ImGui::SameLine();
+	if (_fpsTracker == nullptr) ImGui::Text("No bound tracker");
+	else ImGui::Text("%.2f", _fpsTracker->GetCurrentFrameTimeAverage() * 100.0f);
 
 	ImGui::PlotLines("##FpsGraph", _fpsRecords, s_fpsRecordCount, 0, 0, 0.0f, 200.0f, {0.0f, 50});
 

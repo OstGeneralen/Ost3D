@@ -18,10 +18,11 @@ namespace ost
 			void BeginGuiFrame();
 			void EndGuiFrame(const dx::RenderingBackend& renderBackend);
 		private:
-			WindowEventListener _winEventListener;
-			void ProcessWindowResize(Dimensions newSize);
+			void ProcessWindowResize(const Dimensions& newSize);
 
 			Dimensions _windowDimensions;
+
+			HEventListener _windowResizeListener;
 		};
 	}
 }

@@ -4,6 +4,10 @@
 #include <Engine/Rendering/WindowsInfo.h>
 #include <Engine/Editor/ImGui/imgui_impl_win32.h>
 
+#include <Engine/Utility/Logging/Logging.h>
+
+STATIC_LOG(WindowLog);
+
 std::unordered_map<void*, ost::Window*> WindowHandleClassMap;
 const LPCWSTR WndClassName = L"OstWindowClass";
 
@@ -84,17 +88,6 @@ void Window::Create(const wchar_t* title, Dimensions windowDimensions)
 	_windowDimensions = { physical_width, physical_height };
 }
 
-void ost::Window::RegisterEventListener(WindowEventListener* listener)
-{
-	_eventListeners.insert(listener);
-}
-
-void ost::Window::RemoveEventListener(WindowEventListener* listener)
-{
-	if (!_eventListeners.contains(listener)) return;
-	_eventListeners.erase(listener);
-}
-
 bool Window::GetIsOpen() const { return _open; }
 
 void Window::Close()
@@ -144,10 +137,9 @@ void ost::Window::OnResize()
 
 	_windowDimensions = { physical_width, physical_height };
 
-	for (auto eventListenerPtr : _eventListeners)
-	{
-		eventListenerPtr->NotifySizeChange(_windowDimensions);
-	}
+	WindowLog.LOG_INFO("Window resized. New physical dimensions: {}x{}", physical_width, physical_height);
+
+	Event_Resize.Raise(_windowDimensions);
 }
 
 HWND Window::GetHWND() const

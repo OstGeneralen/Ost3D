@@ -17,6 +17,7 @@ int WINAPI WinMain(
 		engine.BeginFrame();
 		engine.EndFrame();
 	}
+	engine.Shutdown();
 
 	return 0;
 }

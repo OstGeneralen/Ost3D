@@ -39,7 +39,7 @@ namespace ost
 			void DisplayGUI();
 
 		private:
-			void ProcessWindowResize(Dimensions newSize);
+			void ProcessWindowResize(const Dimensions& newSize);
 
 		public: // External access
 			ID3D12Device* GetDevice() const { return _device.Get(); }
@@ -87,8 +87,8 @@ namespace ost
 			unsigned long long _currentFenceValue = 0;
 
 			// Stored data
-			WindowEventListener _winEventListener;
 			Dimensions _windowDimensions;
+			HEventListener _windowResizeEventListener;
 		};
 	}
 }
