@@ -12,7 +12,9 @@ namespace ost
 		class RenderingBackend
 		{
 		public:
-			bool InitializeForWindow(const Window& targetWindow);
+			RenderingBackend();
+
+			bool InitializeForWindow(Window& targetWindow);
 			void Release();
 			void ExecuteQueuedCommandsAndAwaitGPU();
 
@@ -32,6 +34,12 @@ namespace ost
 			IDXGIAdapter1* RequestHardwareAdapter();
 
 			void AwaitGPU();
+
+		public:
+			void DisplayGUI();
+
+		private:
+			void ProcessWindowResize(Dimensions newSize);
 
 		public: // External access
 			ID3D12Device* GetDevice() const { return _device.Get(); }
@@ -79,6 +87,7 @@ namespace ost
 			unsigned long long _currentFenceValue = 0;
 
 			// Stored data
+			WindowEventListener _winEventListener;
 			Dimensions _windowDimensions;
 		};
 	}

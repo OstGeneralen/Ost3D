@@ -24,6 +24,18 @@ LRESULT CALLBACK WindowProcedure(HWND winHandle, UINT message, WPARAM wParam, LP
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
+	case WM_ENTERSIZEMOVE:
+		WindowHandleClassMap[winHandle]->NotifyResizeOrMoveStart();
+		return 0;
+	case WM_EXITSIZEMOVE:
+		WindowHandleClassMap[winHandle]->NotifyResizeOrMoveEnd();
+		return 0;
+	case WM_SIZE:
+		if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)
+		{
+			WindowHandleClassMap[winHandle]->OnResize();
+			return 0;
+		}
 		break;
 	}
 
@@ -56,11 +68,11 @@ void Window::Create(const wchar_t* title, Dimensions windowDimensions)
 		internal::WindowsInfo::appInstance,
 		NULL);
 
-	ShowWindow(_windowHandle, internal::WindowsInfo::cmdShow);
 	WindowHandleClassMap.insert({ _windowHandle, this });
+	ShowWindow(_windowHandle, internal::WindowsInfo::cmdShow);
 	_open = true;
 	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-	
+
 	// Assign window dimensions with DPI
 	RECT logicalRect{};
 	GetClientRect(_windowHandle, &logicalRect);
@@ -70,6 +82,17 @@ void Window::Create(const wchar_t* title, Dimensions windowDimensions)
 	int physical_height = (logicalRect.bottom - logicalRect.top) * (winDpi / 96);
 
 	_windowDimensions = { physical_width, physical_height };
+}
+
+void ost::Window::RegisterEventListener(WindowEventListener* listener)
+{
+	_eventListeners.insert(listener);
+}
+
+void ost::Window::RemoveEventListener(WindowEventListener* listener)
+{
+	if (!_eventListeners.contains(listener)) return;
+	_eventListeners.erase(listener);
 }
 
 bool Window::GetIsOpen() const { return _open; }
@@ -84,10 +107,46 @@ void Window::ProcessEvents()
 {
 	MSG msg;
 
-	while(PeekMessage(&msg, _windowHandle, 0, 0, TRUE))
+	while (PeekMessage(&msg, _windowHandle, 0, 0, TRUE))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
+	}
+}
+
+void ost::Window::NotifyResizeOrMoveStart()
+{
+	_activeResize = true;
+}
+
+void ost::Window::NotifyResizeOrMoveEnd()
+{
+	_activeResize = false;
+	OnResize();
+}
+
+void ost::Window::OnResize()
+{
+	if (_activeResize) return;
+
+	RECT logicalRect{};
+	GetClientRect(_windowHandle, &logicalRect);
+	auto winDpi = GetDpiForWindow(_windowHandle);
+
+	int physical_width = (logicalRect.right - logicalRect.left) * (winDpi / 96);
+	int physical_height = (logicalRect.bottom - logicalRect.top) * (winDpi / 96);
+
+	if (_windowDimensions.X == physical_width && _windowDimensions.Y == physical_height)
+	{
+		// Don't invoke any events since there isn't actually any change
+		return;
+	}
+
+	_windowDimensions = { physical_width, physical_height };
+
+	for (auto eventListenerPtr : _eventListeners)
+	{
+		eventListenerPtr->NotifySizeChange(_windowDimensions);
 	}
 }
 

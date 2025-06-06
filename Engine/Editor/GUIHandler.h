@@ -1,8 +1,8 @@
 #pragma once
+#include <Engine/Rendering/Window/Window.h>
 
 namespace ost
 {
-	class Window;
 	namespace dx
 	{
 		class RenderingBackend;
@@ -13,12 +13,15 @@ namespace ost
 		class GUIHandler
 		{
 		public:
-			void Init( const Window& appWindow, const dx::RenderingBackend& renderBackend );
+			void Init( Window& appWindow, const dx::RenderingBackend& renderBackend );
 			void Uninit();
 			void BeginGuiFrame();
 			void EndGuiFrame(const dx::RenderingBackend& renderBackend);
 		private:
+			WindowEventListener _winEventListener;
+			void ProcessWindowResize(Dimensions newSize);
 
+			Dimensions _windowDimensions;
 		};
 	}
 }

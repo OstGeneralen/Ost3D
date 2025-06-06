@@ -58,13 +58,17 @@ struct GUISRVHeapAllocator
 GUISRVHeapAllocator guiSrvAllocator;
 
 
-void ost::editor::GUIHandler::Init(const Window& appWindow, const dx::RenderingBackend& renderBackend)
+void ost::editor::GUIHandler::Init(Window& appWindow, const dx::RenderingBackend& renderBackend)
 {
+	_winEventListener.ResizeCallback = [&](auto d) {ProcessWindowResize(d); };
+	appWindow.RegisterEventListener(&_winEventListener);
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.DisplaySize = { (float)appWindow.GetWidth(), (float)appWindow.GetHeight() };
+	_windowDimensions = appWindow.GetDimensions();
 
 	ImGui::StyleColorsDark();
 
@@ -96,6 +100,7 @@ void ost::editor::GUIHandler::Uninit()
 
 void ost::editor::GUIHandler::BeginGuiFrame()
 {
+	ImGui::GetIO().DisplaySize = { static_cast<float>(_windowDimensions.X), static_cast<float>(_windowDimensions.Y) };
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -107,4 +112,9 @@ void ost::editor::GUIHandler::EndGuiFrame(const dx::RenderingBackend& renderBack
 	renderBackend.GetCommandList()->SetDescriptorHeaps(1, guiDescHeap);
 	ImGui::Render();
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), renderBackend.GetCommandList());
+}
+
+void ost::editor::GUIHandler::ProcessWindowResize(Dimensions newDim)
+{
+	_windowDimensions = newDim;
 }

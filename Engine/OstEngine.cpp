@@ -88,6 +88,11 @@ void ost::OstEngine::BeginFrame()
 	g_guiHandler.BeginGuiFrame();
 	g_onscreenLogViewer.Display();
 	g_frameDetailsGUI.Display();
+
+	ImGui::Begin("Render Info", 0, ImGuiWindowFlags_NoSavedSettings);
+	g_renderBackend.DisplayGUI();
+	ImGui::End();
+
 #endif
 }
 

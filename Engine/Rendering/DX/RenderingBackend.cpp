@@ -2,7 +2,12 @@
 
 using namespace ost::dx;
 
-bool RenderingBackend::InitializeForWindow(const Window& targetWindow)
+ost::dx::RenderingBackend::RenderingBackend()
+{
+	_winEventListener.ResizeCallback = [&](Dimensions d) {ProcessWindowResize(d); };
+}
+
+bool RenderingBackend::InitializeForWindow(Window& targetWindow)
 {
 	bool success = true;
 
@@ -14,6 +19,8 @@ bool RenderingBackend::InitializeForWindow(const Window& targetWindow)
 	if (success) success &= CreateShaderResourceViewHeap(_srvGUIHeap, true, 128);
 	if (success) success &= CreateCommandList();
 	if (success) success &= CreateGPUSyncObjects();
+
+	targetWindow.RegisterEventListener(&_winEventListener);
 
 	return success;
 }
@@ -40,20 +47,20 @@ void RenderingBackend::Release()
 	AwaitGPU();
 
 	_commandFence.Reset();
-	
+
 	for (int i = 0; i < BufferingNum; ++i)
 	{
 		_commandAllocators[i].Reset();
 		_renderTargets[i].Reset();
 	}
-	
+
 	_commandList.Reset();
 	_commandQueue.Reset();
 
 	_srvActiveHeap.Reset();
 	_srvStagingHeap.Reset();
 	_rtvHeap.Reset();
-	
+
 	_swapchain.Reset();
 	_device.Reset();
 	_factory.Reset();
@@ -70,11 +77,15 @@ void RenderingBackend::BeginFrame(RGBAColor_f32 clearColor)
 	// If the previous instance of the frame buffer we're now trying to enter has not finished, wait for the GPU to be done
 	// Obviously not ideal but ain't no nice way to get around this
 	// We could triple buffer but that only lowers the chance of this happening
-	if (_commandFenceValues[currentFrameResourceIndex] != 0 && _commandFence->GetCompletedValue() < _commandFenceValues[currentFrameResourceIndex])
+
+	unsigned long long completedValue = _commandFence->GetCompletedValue();
+
+	if (_commandFenceValues[currentFrameResourceIndex] != 0 && completedValue < _commandFenceValues[currentFrameResourceIndex])
 	{
 		_commandFence.Get()->SetEventOnCompletion(_commandFenceValues[currentFrameResourceIndex], _bufferFenceEvent);
 		WaitForSingleObjectEx(_bufferFenceEvent, INFINITE, FALSE);
 	}
+
 
 	_commandAllocators[currentFrameResourceIndex].Get()->Reset();
 	_commandList.Get()->Reset(_commandAllocators[currentFrameResourceIndex].Get(), nullptr);
@@ -341,11 +352,51 @@ IDXGIAdapter1* RenderingBackend::RequestHardwareAdapter()
 
 void ost::dx::RenderingBackend::AwaitGPU()
 {
-	_commandQueue->Signal(_commandFence.Get(), _commandFenceValues[_bufferIndex]);
+	unsigned long long awaitValue = _currentFenceValue;
+	_commandQueue->Signal(_commandFence.Get(), awaitValue);
 
-	_commandFence->SetEventOnCompletion(_commandFenceValues[_bufferIndex], _bufferFenceEvent);
+	_currentFenceValue++;
+
+	_commandFence->SetEventOnCompletion(awaitValue, _bufferFenceEvent);
 	WaitForSingleObjectEx(_bufferFenceEvent, INFINITE, FALSE);
+}
 
-	_commandFenceValues[_bufferIndex]++;
+
+#include <Engine/Editor/ImGui/imgui.h>
+void ost::dx::RenderingBackend::DisplayGUI()
+{
+	{ // Swapchain info
+		DXGI_SWAP_CHAIN_DESC swapchainDesc;
+		_swapchain->GetDesc(&swapchainDesc);
+
+		ImGui::Text("SWAPCHAIN");
+		ImGui::Text("Buffer count: %i", swapchainDesc.BufferCount);
+		ImGui::Text("Buffer dimensions: %ix%i", swapchainDesc.BufferDesc.Width, swapchainDesc.BufferDesc.Height);
+	}
+}
+
+void ost::dx::RenderingBackend::ProcessWindowResize(Dimensions newSize)
+{
+	AwaitGPU();
+
+	_windowDimensions = newSize;
+	// Now we can resize
+	for (unsigned i = 0; i < BufferingNum; ++i)
+	{
+		_renderTargets[i].Reset();
+	}
+
+	_swapchain->ResizeBuffers(BufferingNum, _windowDimensions.X, _windowDimensions.Y, _rtvFormat, 0);
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(_rtvHeap->GetCPUDescriptorHandleForHeapStart());
+	for (unsigned i = 0; i < BufferingNum; ++i)
+	{
+		if (FAILED(_swapchain->GetBuffer(i, IID_PPV_ARGS(&(_renderTargets[i])))))
+		{
+		}
+
+		_device.Get()->CreateRenderTargetView(_renderTargets[i].Get(), nullptr, rtvHandle);
+		rtvHandle.Offset(1, _rtvHeapSize);
+	}
 }
 
