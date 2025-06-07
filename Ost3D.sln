@@ -10,6 +10,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Application", "Application\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{396760B4-930B-4274-949A-335441E54066}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ost3D", "Ost3D", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Ost3D\Core\Core.vcxproj", "{F5454262-D365-4862-9A60-A78280EFB42F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -34,9 +38,20 @@ Global
 		{396760B4-930B-4274-949A-335441E54066}.Release|x64.Build.0 = Release|x64
 		{396760B4-930B-4274-949A-335441E54066}.Release|x86.ActiveCfg = Release|Win32
 		{396760B4-930B-4274-949A-335441E54066}.Release|x86.Build.0 = Release|Win32
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Debug|x64.ActiveCfg = Debug|x64
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Debug|x64.Build.0 = Debug|x64
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Debug|x86.ActiveCfg = Debug|Win32
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Debug|x86.Build.0 = Debug|Win32
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Release|x64.ActiveCfg = Release|x64
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Release|x64.Build.0 = Release|x64
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Release|x86.ActiveCfg = Release|Win32
+		{F5454262-D365-4862-9A60-A78280EFB42F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F5454262-D365-4862-9A60-A78280EFB42F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DAAEF3D-367A-485C-AE7D-D112E0D43C26}
