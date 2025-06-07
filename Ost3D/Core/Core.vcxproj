@@ -147,6 +147,7 @@
     <ClInclude Include="Public\Utility\Events.h" />
     <ClInclude Include="Public\Utility\Event\EventInternal.h" />
     <ClInclude Include="Public\Utility\Event\EventListenerHandle.h" />
+    <ClInclude Include="Public\Utility\FlagEnum.h" />
     <ClInclude Include="Public\Utility\IDType.h" />
     <ClInclude Include="Public\TypeDefs.h" />
     <ClInclude Include="Public\Utility\Event\Event.h" />
