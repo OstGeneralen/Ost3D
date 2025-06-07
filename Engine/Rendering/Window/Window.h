@@ -11,6 +11,7 @@ namespace ost
 		TEvent<Dimensions> Event_Resize;
 
 	public:
+		void Create(const char* title, Dimensions windowDimensions);
 		void Create(const wchar_t* title, Dimensions windowDimensions);
 
 		bool GetIsOpen() const;

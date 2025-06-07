@@ -1,12 +1,12 @@
 #pragma once
 #if _WIN32
 #include <Windows.h>
-#include <Engine/Rendering/Window/Window.h>
-#include <Engine/Math/Vector/VectorsGeneric.h>
 #endif
-#include <Engine/Utility/Time/Timer.h>
-#include <Engine/Utility/Time/FPSTracker.h>
+#include <Engine/OstEngineApp.h>
 
+#include <Engine/Rendering/Window/Window.h>
+#include <Engine/Rendering/DX/RenderingBackend.h>
+#include <Engine/Editor/GUIHandler.h>
 
 namespace ost
 {
@@ -16,17 +16,19 @@ namespace ost
 #if _WIN32
 		OstEngine(HINSTANCE appHinstance, LPSTR cmd, int cmdShow);
 #endif
-		~OstEngine();
-		void CreateAppWindow(const wchar_t* title, Dimensions windowDimensions);
-		bool IsAppWindowOpen() const;
+		~OstEngine() = default;
 
-		void BeginFrame();
-		void EndFrame();
+		void InitializeAndRun(OstEngineApp& app);
 
-		void Shutdown();
 	private:
+		void Initialize();
+		void Run();
+		void Shutdown();
+
+	private:
+		OstEngineApp* _app;
 		Window _appWindow;
-		Timer _frameTimer;
-		FPSTracker _fpsTracker{10, 0.5f};
+		dx::RenderingBackend _renderingBackend;
+		gui::GUIHandler _guiHandler;
 	};
 }

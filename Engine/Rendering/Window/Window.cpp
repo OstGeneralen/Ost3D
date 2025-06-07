@@ -46,6 +46,12 @@ LRESULT CALLBACK WindowProcedure(HWND winHandle, UINT message, WPARAM wParam, LP
 	return DefWindowProc(winHandle, message, wParam, lParam);
 }
 
+void Window::Create(const char* title, Dimensions windowDimensions)
+{
+	std::string cs{ title };
+	std::wstring ws{ cs.begin(), cs.end() };
+	Create(ws.c_str(), windowDimensions);
+}
 void Window::Create(const wchar_t* title, Dimensions windowDimensions)
 {
 	WNDCLASSEX windowClass;

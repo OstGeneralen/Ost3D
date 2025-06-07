@@ -1,17 +1,16 @@
 #pragma once
-#include <Engine/Rendering/Shader/IShaderCompiler.h>
+#include <Engine/Rendering/RenderState.h>
 
 namespace ost
 {
-	struct RenderingContext
+	class RenderingContext
 	{
-		RenderingContext(IShaderCompiler& compiler)
-			: ShaderCodeCompiler{ compiler }
-		{
-		}
-		RenderingContext(RenderingContext&& c) noexcept = default;
+	public:
+		virtual ~RenderingContext() = default;
 
+		virtual RenderState CreateRenderState(const RenderStateDesc& desc) = 0;
+		virtual void ReleaseRenderState(RenderState& state) = 0;
 
-		IShaderCompiler& ShaderCodeCompiler;
+		virtual void SetActiveRenderState(RenderState& state) = 0;
 	};
 }

@@ -1,7 +1,8 @@
 #pragma comment(lib, "Engine_Debug")
 
 #include <Windows.h>
-#include <Engine/OstEngine.h>
+#include <Engine/Ost3D.h>
+#include "Application.h"
 
 int WINAPI WinMain(
 	_In_ HINSTANCE instanceHandle,
@@ -9,15 +10,7 @@ int WINAPI WinMain(
 	_In_ LPSTR commandLine,
 	_In_ int commandLineShow)
 {
-	ost::OstEngine engine(instanceHandle, commandLine, commandLineShow);
-	engine.CreateAppWindow(L"OstEngine Window", { 1920, 1080 });
-	
-	while (engine.IsAppWindowOpen())
-	{
-		engine.BeginFrame();
-		engine.EndFrame();
-	}
-	engine.Shutdown();
-
+	Application app;
+	ost::Ost3D_Run_Win32(app, instanceHandle, commandLine, commandLineShow);
 	return 0;
 }

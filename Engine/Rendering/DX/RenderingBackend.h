@@ -2,6 +2,9 @@
 #include "DXCore.h"
 #include <Engine/Rendering/Window/Window.h>
 #include <Engine/Rendering/Color/Color.h>
+#include <Engine/Rendering/Shader/Shader.h>
+#include <Engine/Rendering/RenderState.h>
+#include <unordered_set>
 
 namespace ost
 {
@@ -18,9 +21,15 @@ namespace ost
 			void Release();
 			void ExecuteQueuedCommandsAndAwaitGPU();
 
+			RenderState CreateRenderState(const RenderStateDesc& desc);
+			void ReleaseRenderState(RenderState& state);
+
 		public:
 			// Render loop functions
 			void BeginFrame(RGBAColor_f32 clearColor);
+
+			void SetActiveRenderState(RenderState& state);
+
 			void EndAndPresentFrame();
 
 		private:

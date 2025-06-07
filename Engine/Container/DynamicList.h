@@ -3,6 +3,7 @@
 #include <Engine/OstEngineTypedefs.h>
 #include <Engine/Utility/Memory/MemUtils.h>
 #include <Engine/Container/Internal/ContainerElemOps.h>
+#include <Engine/Utility/Ops.h>
 
 #define DYNAMIC_LIST_ASSERTIONS 1
 

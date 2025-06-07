@@ -1,4 +1,8 @@
 #include "RenderingBackend.h"
+#include "ShaderCompiler.h"
+#include <Engine/Utility/Logging/Logging.h>
+
+STATIC_LOG(DXRendering);
 
 using namespace ost::dx;
 
@@ -39,6 +43,107 @@ void RenderingBackend::ExecuteQueuedCommandsAndAwaitGPU()
 		_commandFence.Get()->SetEventOnCompletion(pushFenceValue, _bufferFenceEvent);
 		WaitForSingleObjectEx(_bufferFenceEvent, INFINITE, FALSE);
 	}
+}
+
+ost::RenderState ost::dx::RenderingBackend::CreateRenderState(const RenderStateDesc& desc)
+{
+	// Create the root signature for this state
+	// Todo: If the state wants any constant buffers we are going to set these up here
+	CD3DX12_ROOT_SIGNATURE_DESC rootDesc{};
+	rootDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> signatureBlob;
+	ComPtr<ID3DBlob> errorBlob;
+
+
+	if (FAILED(D3D12SerializeRootSignature(&rootDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob)))
+	{
+		DXRendering.LOG_ERROR("Failed to serialize root signature: {}", errorBlob->GetBufferPointer());
+		return {};
+	}
+
+	ID3D12RootSignature* rootSignaturePtr;
+	if (FAILED(_device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignaturePtr))))
+	{
+		DXRendering.LOG_ERROR("Failed to create root signature");
+		return {};
+	}
+
+	// Now we can go ahead and create our actual pipeline state
+
+	// Compile shaders
+	ShaderCompiler compiler;
+	CompiledShader vertexShader;
+	CompiledShader pixelShader;
+
+	{
+		ShaderCompileInfo vsCompileStatus = desc.CompileVertexShader(compiler);
+		if (vsCompileStatus.Status == false)
+		{
+			DXRendering.LOG_ERROR("Failed to compile vertex shader: '{}'", vsCompileStatus.ErrorMessage);
+			return {};
+		}
+		vertexShader = vsCompileStatus.Shader;
+	}
+
+	{
+		ShaderCompileInfo psCompileStatus = desc.CompilePixelShader(compiler);
+		if (psCompileStatus.Status == false)
+		{
+			DXRendering.LOG_ERROR("Failed to compile pixel shader: '{}'", psCompileStatus.ErrorMessage);
+			return {};
+		}
+		pixelShader = psCompileStatus.Shader;
+	}
+
+	// Create state
+	D3D12_INPUT_ELEMENT_DESC inElemDescs[16];
+
+	void* inElemDescsVoidPtr = inElemDescs; // Thank you C++ for trying to protect me but also screw you for trying to protect me :)
+	desc.PopulateInputElementsDesc(&inElemDescsVoidPtr);
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC stateDesc{};
+	stateDesc.InputLayout.NumElements = desc.GetInputElementNum();
+	stateDesc.InputLayout.pInputElementDescs = inElemDescs;
+	stateDesc.pRootSignature = rootSignaturePtr;
+	stateDesc.VS = CD3DX12_SHADER_BYTECODE{ vertexShader.CompiledData, vertexShader.CompiledDataSize };
+	stateDesc.PS = CD3DX12_SHADER_BYTECODE{ pixelShader.CompiledData, pixelShader.CompiledDataSize };
+
+	stateDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	stateDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+
+	stateDesc.DepthStencilState.DepthEnable = desc.DepthEnabled;
+	stateDesc.DepthStencilState.StencilEnable = desc.StencilEnabled;
+
+	stateDesc.SampleMask = UINT_MAX;
+	stateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	stateDesc.NumRenderTargets = 1;
+	stateDesc.RTVFormats[0] = _rtvFormat;
+	stateDesc.SampleDesc.Count = 1;
+	stateDesc.SampleDesc.Quality = 0;
+	
+	ID3D12PipelineState* psoPtr;
+	if (FAILED(_device->CreateGraphicsPipelineState(&stateDesc, IID_PPV_ARGS(&psoPtr))))
+	{
+		DXRendering.LOG_ERROR("Failed to create pipeline state");
+		return {};
+	}
+
+	RenderState createdState;
+	createdState._psoPtr = psoPtr;
+	createdState._rootSigPtr = rootSignaturePtr;
+	return createdState;
+}
+
+void ost::dx::RenderingBackend::ReleaseRenderState(RenderState& state)
+{
+	ID3D12RootSignature* rootSigPtr = (ID3D12RootSignature*)(state._rootSigPtr);
+	ID3D12PipelineState* psoPtr = (ID3D12PipelineState*)(state._psoPtr);
+
+	psoPtr->Release();
+	rootSigPtr->Release();
+	state._psoPtr = nullptr;
+	state._rootSigPtr = nullptr;
 }
 
 void RenderingBackend::Release()
@@ -123,6 +228,14 @@ void RenderingBackend::BeginFrame(RGBAColor_f32 clearColor)
 	_commandList.Get()->ClearRenderTargetView(rtvHandle, cc, 0, nullptr);
 
 	_bufferIndex = currentFrameResourceIndex;
+}
+
+void ost::dx::RenderingBackend::SetActiveRenderState(RenderState& state)
+{
+	if (!state.Valid()) return;
+
+	_commandList->SetGraphicsRootSignature((ID3D12RootSignature*)( state._rootSigPtr));
+	_commandList->SetPipelineState((ID3D12PipelineState*)(state._psoPtr));
 }
 
 void RenderingBackend::EndAndPresentFrame()

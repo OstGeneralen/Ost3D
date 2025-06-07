@@ -7,21 +7,12 @@
 #if _WIN32
 #include "Rendering/WindowsInfo.h"
 #endif
-#include <Engine/Rendering/DX/RenderingBackend.h>
-#include <Engine/Editor/GUIHandler.h>
-#include <Engine/Editor/ImGui/imgui.h>
-#include <Engine/Utility/Logging/Logging.h>
 
-ost::dx::RenderingBackend g_renderBackend;
 
-#if ENGINE_GUI_ENABLED
-#include <Engine/Editor/EngineGUI/OnscreenLogViewer.h>
-#include <Engine/Editor/EngineGUI/FrameDetailsGUI.h>
-ost::editor::GUIHandler g_guiHandler;
-
-ost::gui::OnscreenLogViewer g_onscreenLogViewer(8);
-ost::gui::FrameDetailsGUI g_frameDetailsGUI;
-#endif
+#include "Rendering/DX/RenderingBackend.h"
+#include "Utility/Logging/Logging.h"
+#include "Editor/GUIHandler.h"
+#include "Utility/Time/Timer.h"
 
 STATIC_LOG(EngineLog);
 
@@ -29,6 +20,10 @@ using namespace ost;
 
 #if _WIN32
 ost::OstEngine::OstEngine(HINSTANCE appHinstance, LPSTR cmd, int cmdShow)
+	: _app{nullptr}
+	, _appWindow{}
+	, _renderingBackend{}
+	, _guiHandler{}
 {
 	internal::WindowsInfo::appInstance = appHinstance;
 	internal::WindowsInfo::cmdLine = cmd;
@@ -36,77 +31,51 @@ ost::OstEngine::OstEngine(HINSTANCE appHinstance, LPSTR cmd, int cmdShow)
 }
 #endif
 
-ost::OstEngine::~OstEngine()
+void ost::OstEngine::InitializeAndRun(OstEngineApp& app)
 {
-#if ENGINE_GUI_ENABLED
-	g_guiHandler.Uninit();
-#endif
-	g_renderBackend.Release();
-
-	log::LoggingContext::Uninitialize();
+	_app = &app;
+	Initialize();
+	Run();
+	Shutdown();
 }
 
-void OstEngine::CreateAppWindow(const wchar_t* title, Dimensions windowDimensions)
+void ost::OstEngine::Initialize()
 {
 	log::LoggingContext::Initialize();
 
-	_appWindow.Create(title, windowDimensions);
-	g_renderBackend.InitializeForWindow(_appWindow);
+	_appWindow.Create(_app->GetAppName().c_str(), {1920,1080});
+	_renderingBackend.InitializeForWindow(_appWindow);
+	_guiHandler.Init(_appWindow, _renderingBackend);
 
-#if ENGINE_GUI_ENABLED
-	g_guiHandler.Init(_appWindow, g_renderBackend);
-	g_onscreenLogViewer.Initialize();
-	g_frameDetailsGUI.BindFPSTracker(_fpsTracker);
-#endif
-
-	EngineLog.LOG_CONFIRM("OstEngine Initialized");
+	_app->Start();
 }
 
-bool ost::OstEngine::IsAppWindowOpen() const
+void ost::OstEngine::Run()
 {
-	return _appWindow.GetIsOpen();
-}
+	Timer deltaTimer;
+	deltaTimer.Start();
 
-void ost::OstEngine::BeginFrame()
-{
-	float deltaTime = 0.0f;
-
-	if (_frameTimer.IsRunning())
+	while (_appWindow.GetIsOpen())
 	{
-		_frameTimer.Stop();
-		deltaTime = _frameTimer.GetDurationSeconds();
-		_fpsTracker.AddSample(deltaTime);
-		_fpsTracker.TickTracker();
+		deltaTimer.Stop();
+		const float dt = deltaTimer.GetDurationSeconds();
+		deltaTimer.Start();
+
+		_appWindow.ProcessEvents();
+
+		_renderingBackend.BeginFrame({ 0x1b1b1bFF });
+		_guiHandler.BeginGuiFrame();
+
+		_app->Tick(dt);
+
+		_guiHandler.EndGuiFrame(_renderingBackend);
+		_renderingBackend.EndAndPresentFrame();
 	}
-	_frameTimer.Start();
-
-
-	_appWindow.ProcessEvents();
-	g_renderBackend.BeginFrame(RGBAColor_f32(0x101010FF));
-
-#if ENGINE_GUI_ENABLED
-	g_guiHandler.BeginGuiFrame();
-	g_onscreenLogViewer.Display();
-	g_frameDetailsGUI.Display();
-
-	ImGui::Begin("Render Info", 0, ImGuiWindowFlags_NoSavedSettings);
-	g_renderBackend.DisplayGUI();
-	ImGui::End();
-
-#endif
 }
-
-void ost::OstEngine::EndFrame()
-{
-#if ENGINE_GUI_ENABLED
-	g_guiHandler.EndGuiFrame(g_renderBackend);
-#endif
-	g_renderBackend.EndAndPresentFrame();
-}
-
 
 void ost::OstEngine::Shutdown()
 {
-	g_guiHandler.Uninit();
-	g_renderBackend.Release();
+	_app->Shutdown();
+	_guiHandler.Uninit();
+	_renderingBackend.Release();
 }

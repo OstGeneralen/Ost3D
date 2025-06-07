@@ -58,7 +58,7 @@ struct GUISRVHeapAllocator
 GUISRVHeapAllocator guiSrvAllocator;
 
 
-void ost::editor::GUIHandler::Init(Window& appWindow, const dx::RenderingBackend& renderBackend)
+void ost::gui::GUIHandler::Init(Window& appWindow, const dx::RenderingBackend& renderBackend)
 {
 	_windowResizeListener = appWindow.Event_Resize.Listen([this](const auto& d) {ProcessWindowResize(d); });
 
@@ -90,7 +90,7 @@ void ost::editor::GUIHandler::Init(Window& appWindow, const dx::RenderingBackend
 	ImGui_ImplDX12_Init(&initInfo);
 }
 
-void ost::editor::GUIHandler::Uninit()
+void ost::gui::GUIHandler::Uninit()
 {
 	_windowResizeListener.Reset();
 
@@ -99,7 +99,7 @@ void ost::editor::GUIHandler::Uninit()
 	ImGui::DestroyContext();
 }
 
-void ost::editor::GUIHandler::BeginGuiFrame()
+void ost::gui::GUIHandler::BeginGuiFrame()
 {
 	ImGui::GetIO().DisplaySize = { static_cast<float>(_windowDimensions.X), static_cast<float>(_windowDimensions.Y) };
 	ImGui_ImplDX12_NewFrame();
@@ -107,7 +107,7 @@ void ost::editor::GUIHandler::BeginGuiFrame()
 	ImGui::NewFrame();
 }
 
-void ost::editor::GUIHandler::EndGuiFrame(const dx::RenderingBackend& renderBackend)
+void ost::gui::GUIHandler::EndGuiFrame(const dx::RenderingBackend& renderBackend)
 {
 	ID3D12DescriptorHeap* guiDescHeap[]{ renderBackend.GetSRVHeapGUI() };
 	renderBackend.GetCommandList()->SetDescriptorHeaps(1, guiDescHeap);
@@ -115,7 +115,7 @@ void ost::editor::GUIHandler::EndGuiFrame(const dx::RenderingBackend& renderBack
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), renderBackend.GetCommandList());
 }
 
-void ost::editor::GUIHandler::ProcessWindowResize(const Dimensions& newDim)
+void ost::gui::GUIHandler::ProcessWindowResize(const Dimensions& newDim)
 {
 	_windowDimensions = newDim;
 }
