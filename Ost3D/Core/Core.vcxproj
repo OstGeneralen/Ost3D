@@ -144,6 +144,7 @@
     <ClInclude Include="Public\Math\Matrix\Matrix4x4.h" />
     <ClInclude Include="Public\Math\Vector\Vector3.h" />
     <ClInclude Include="Public\Math\Vector\Vector4.h" />
+    <ClInclude Include="Public\Ost3DCore.h" />
     <ClInclude Include="Public\Utility\Events.h" />
     <ClInclude Include="Public\Utility\Event\EventInternal.h" />
     <ClInclude Include="Public\Utility\Event\EventListenerHandle.h" />
